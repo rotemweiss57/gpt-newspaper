@@ -1,0 +1,71 @@
+body {
+    font-family: 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    font-family: 'Georgia', serif;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header .title {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.header .subtitle {
+    font-size: 20px;
+    font-style: italic;
+    color: #666;
+}
+
+.main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px;
+}
+
+.article {
+    margin-bottom: 20px;
+}
+
+.article .paragraph {
+    margin-bottom: 15px;
+}
+
+.footer {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 30px;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 95%;
+    }
+
+    .header .title {
+        font-size: 24px;
+    }
+
+    .header .subtitle {
+        font-size: 18px;
+    }
+}

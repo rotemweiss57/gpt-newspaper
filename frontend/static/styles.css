@@ -1,0 +1,131 @@
+@import url('https://fonts.cdnfonts.com/css/chomsky');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #111827;
+    color: #EEEEEF;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #2D3748;
+    color: #E2E8F0;
+    width: 80%;
+    max-width: 1000px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+header {
+    position: relative;
+    text-align: center;
+}
+
+.header-content {
+    font-family: 'Chomsky', sans-serif;
+    font-size: 32px;
+    color: #EEEEEF;
+}
+
+.powered-by {
+    position: absolute;
+    bottom: 37px;
+    right: 310px;
+    font-size: 14px;
+    color: #CBD5E0;
+}
+
+.powered-by a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.powered-by a:hover {
+    text-decoration: underline;
+}
+
+.topic-selection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.form-group label {
+    color: #A0AEC0;
+}
+
+.form-group input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #2D3748;
+    border-radius: 10px;
+    width: 70%;
+    justify-content: center;
+    background-color: #1A202C;
+    color: #E2E8F0;
+}
+
+#produceNewspaper {
+    display: block;
+    width: 25%;
+    background-color: #A94FDD;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#produceNewspaper:hover {
+    background-color: #8B5CBB;
+}
+
+.hidden {
+    display: none;
+}
+
+#loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #CBD5E0;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+#loadingMessages {
+    animation: fadeInOut 2s linear infinite;
+}
+
+
+.icon {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.add-topic {
+}
+
+.remove-topic {
+}
