@@ -38,6 +38,7 @@ function toggleLoading(isLoading) {
     const loadingSection = document.getElementById('loading');
     const loadingMessages = document.getElementById('loadingMessages');
     const messages = ["Looking for news...", "Curating sources...", "Writing articles...", "Editing final newspaper..."];
+    loadingMessages.style.fontFamily = "'Gill Sans', sans-serif";
     if (isLoading) {
         loadingSection.classList.remove('hidden');
         let messageIndex = 0;
@@ -83,7 +84,7 @@ function addIconToLastTopic() {
         if (topicCount > 1) {
             const removeIcon = document.createElement('span');
             removeIcon.className = 'icon remove-topic';
-            removeIcon.textContent = '🗑️';
+            removeIcon.textContent = '-';
             removeIcon.addEventListener('click', removeTopicField);
             lastTopic.appendChild(removeIcon);
         }
@@ -95,10 +96,23 @@ function addTopicField() {
     const formGroup = document.createElement('div');
     formGroup.className = 'form-group';
     formGroup.id = 'topicGroup' + topicCount;
-    formGroup.innerHTML = `<input type="text" id="topic${topicCount}" name="topic${topicCount}" required>`;
+
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+    inputElement.id = 'topic' + topicCount;
+    inputElement.name = 'topic' + topicCount;
+    inputElement.required = true;
+
+    inputElement.style.fontFamily = "'Gill Sans', sans-serif";
+    inputElement.style.fontSize = '25px';
+
+    formGroup.appendChild(inputElement);
+
     document.getElementById('topicForm').appendChild(formGroup);
+
     addIconToLastTopic();
 }
+
 
 function removeTopicField(event) {
     const topicGroup = event.target.parentElement;
