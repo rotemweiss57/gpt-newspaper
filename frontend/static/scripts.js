@@ -1,5 +1,5 @@
 
-let selectedLayout = 'layout_1.css'; // Default layout
+let selectedLayout = 'layout_1.html'; // Default layout
 
 function selectLayout(event) {
     document.querySelectorAll('.layout-icon').forEach(icon => {
