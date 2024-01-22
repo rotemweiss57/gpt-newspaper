@@ -10,8 +10,10 @@ def index():
 
 @backend_app.route('/generate_newspaper', methods=['POST'])
 def generate_newspaper():
-    queries = request.json
+    data = request.json
+    queries = data["topics"]
+    layout = data["layout"]
     master_agent = MasterAgent()
-    newspaper = master_agent.run(queries)
+    newspaper = master_agent.run(queries, layout)
     return jsonify({"path": newspaper}), 200
 

@@ -1,3 +1,15 @@
+
+let selectedLayout = 'layout_1.css'; // Default layout
+
+function selectLayout(event) {
+    document.querySelectorAll('.layout-icon').forEach(icon => {
+        icon.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+    selectedLayout = event.target.getAttribute('data-layout');
+}
+
+
 function produceNewspaper() {
     var topics = [];
     for (var i = 1; i <= topicCount; i++) {
@@ -16,12 +28,17 @@ function produceNewspaper() {
     toggleLoading(true);
 
 
+    const payload = {
+        topics: topics,
+        layout: selectedLayout
+    };
+
     fetch('http://localhost:8000/generate_newspaper', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(topics)
+        body: JSON.stringify(payload)
     })
     .then(response => response.json())
     .then(data => {
@@ -63,6 +80,9 @@ let topicCount = 1;
 
 window.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('produceNewspaper').addEventListener('click', produceNewspaper);
+    document.querySelectorAll('.layout-icon').forEach(icon => {
+        icon.addEventListener('click', selectLayout);
+    });
     addIconToLastTopic();
 });
 

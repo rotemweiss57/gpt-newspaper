@@ -12,14 +12,14 @@ class MasterAgent:
         self.output_dir = f"outputs/run_{int(time.time())}"
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def run(self, queries: list):
+    def run(self, queries: list, layout: str):
         # Initialize agents
         search_agent = SearchAgent()
         curator_agent = CuratorAgent()
         writer_agent = WriterAgent()
         critique_agent = CritiqueAgent()
         designer_agent = DesignerAgent(self.output_dir)
-        editor_agent = EditorAgent()
+        editor_agent = EditorAgent(layout)
         publisher_agent = PublisherAgent(self.output_dir)
 
         # Define a Langchain graph

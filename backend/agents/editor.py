@@ -1,6 +1,9 @@
 import os
 
 class EditorAgent:
+    def __init__(self, layout):
+        self.layout = layout
+
     def load_html_template(self):
         template_path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'newspaper', 'index.html')
         with open(template_path) as f:
@@ -11,9 +14,9 @@ class EditorAgent:
         with open(css_path) as f:
             return f.read()
 
-    def editor(self, articles, layout='layout_1.css'):
+    def editor(self, articles):
         html_template = self.load_html_template()
-        css_content = self.load_css_content(layout)
+        css_content = self.load_css_content(self.layout)
 
         # Insert CSS content into HTML template
         html_template = html_template.replace("<!-- CSS_PLACEHOLDER -->", css_content)

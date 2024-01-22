@@ -231,3 +231,21 @@ header {
 
 .remove-topic {
 }
+
+.layout-selection {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.layout-icon {
+    cursor: pointer;
+    margin: 0 10px;
+    width: 100px;
+    height: auto;
+    border: 2px solid transparent;
+}
+
+.layout-icon.selected {
+    border-color: #A94FDD;
+}
+
