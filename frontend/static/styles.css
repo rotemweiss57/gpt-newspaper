@@ -14,12 +14,7 @@ body {
 
 .inputText {
    font-family: 'Gill Sans', sans-serif;
-   font-size: 25px;
-}
-
-
-.layout {
-   font-family: 'Gill Sans', sans-serif;
+   font-size: 20px;
 }
 
 .spinner {
@@ -51,7 +46,6 @@ body {
     width: 80%;
     max-width: 1000px;
     padding: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
 }
 
@@ -242,12 +236,10 @@ header {
     margin: 20px 0;
 }
 
-
-
 .layout-icon {
     cursor: pointer;
     margin: 0 10px;
-    width: 40px;
+    width: 70px;
     height: auto;
     border: 2px solid transparent;
 }
@@ -255,4 +247,3 @@ header {
 .layout-icon.selected {
     border-color: #A94FDD;
 }
-

@@ -121,10 +121,8 @@ function addTopicField() {
     inputElement.type = 'text';
     inputElement.id = 'topic' + topicCount;
     inputElement.name = 'topic' + topicCount;
+    inputElement.className = 'inputText';
     inputElement.required = true;
-
-    inputElement.style.fontFamily = "'Gill Sans', sans-serif";
-    inputElement.style.fontSize = '25px';
 
     formGroup.appendChild(inputElement);
 
