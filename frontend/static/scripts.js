@@ -67,7 +67,7 @@ function toggleLoading(isLoading) {
             } else {
                 clearInterval(interval);
             }
-        }, 6000);
+        }, 10000);
         loadingSection.dataset.intervalId = interval;
     } else {
         loadingSection.classList.add('hidden');

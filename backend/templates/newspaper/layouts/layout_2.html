@@ -6,7 +6,7 @@
     <link rel="icon" type="image/x-icon" href="../../frontend/static/favicon.ico">
     <title>GPT Newspaper</title>
     <style>
-        @import url('https://fonts.cdnfonts.com/css/chomsky');
+@import url('https://fonts.cdnfonts.com/css/chomsky');
 @import url('https://db.onlinewebfonts.com/c/4c4a87973ef80fc72049e01b9085fadc?family=ABC+Diatype');
 
 body {
@@ -16,11 +16,13 @@ body {
     margin: 0;
     padding: 0;
 }
+
 header, .content, footer {
     width: 80%;
     margin: auto;
     overflow: hidden;
 }
+
 header {
     padding: 1em 0;
     background-color: #f2f2f2;
@@ -28,43 +30,56 @@ header {
     text-align: center;
     font-family: 'Chomsky', serif;
 }
+
 .content {
     display: flex;
     flex-direction: column;
 }
+
 h1 {
     font-size: 3em;
     margin-bottom: 0.5em;
 }
+
 h2 {
     font-size: 1em;
     margin-bottom: 0.3em;
 }
+
 p {
     font-size: 1.1em;
     line-height: 1.6;
 }
+
 .article {
     display: flex;
-    align-items: center;
+    flex-direction: row;
+    align-items: start;
     margin: 1em 0;
+    gap: 20px;
 }
+
 .article img {
-    width: 200px; /* Smaller image */
+    width: 200px;
     height: auto;
-    margin-right: 1em;
 }
+
+.article h2, .article p {
+    margin: 0;
+    padding: 0;
+}
+
 .source {
     font-size: 0.8em;
     color: #888;
 }
+
 footer {
     background-color: #f2f2f2;
     color: black;
     text-align: center;
     padding: 1em 0;
 }
-
     </style>
 </head>
 <body>

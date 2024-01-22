@@ -11,8 +11,10 @@ article_templates = {
     "layout_2.html": """
     <div class="article">
         <img src="{{image}}" alt="Article Image">
-        <a href="{{path}}" target="_blank"><h2>{{title}}</h2></a>
-        <p>{{summary}}</p>
+        <div>
+            <a href="{{path}}" target="_blank"><h2>{{title}}</h2></a>
+            <p>{{summary}}</p>
+        </div>
     </div>
     """,
     "layout_3.html": """
