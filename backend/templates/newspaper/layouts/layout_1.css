@@ -1,0 +1,58 @@
+@import url('https://fonts.cdnfonts.com/css/chomsky');
+@import url('https://db.onlinewebfonts.com/c/4c4a87973ef80fc72049e01b9085fadc?family=ABC+Diatype');
+
+body {
+    font-family: 'ABCDiatype', serif;
+    color: #333;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+header, .content, footer {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+header {
+    padding: 1em 0;
+    background-color: #f2f2f2;
+    color: black;
+    text-align: center;
+    font-family: 'Chomsky', serif;
+}
+.content {
+    column-count: 2;
+    column-gap: 2em;
+}
+h1 {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+}
+h2 {
+    font-size: 1.5em;
+    margin-bottom: 0.3em;
+}
+p {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+.article img {
+    max-width: 100%;
+    max-height: 400px;
+    display: block;
+    margin: 0 auto 1em;
+}
+.article {
+    margin: 1em 0;
+    break-inside: avoid;
+}
+.source {
+    font-size: 0.8em;
+    color: #888;
+}
+footer {
+    background-color: #f2f2f2;
+    color: black;
+    text-align: center;
+    padding: 1em 0;
+}
