@@ -21,6 +21,9 @@ Each agent plays a critical role in delivering a unique and personalized newspap
 </div>
 
 
+## Demo
+https://github.com/assafelovic/gpt-newspaper/assets/91344214/7f265369-1293-4d95-9be5-02070f12c67e
+
 
 ## 🌟 Features
 
