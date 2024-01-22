@@ -9,9 +9,10 @@ GPT Newspaper consists of six specialized sub-agents in LangChain's new [LangGra
 1. **Search Agent**: Scours the web for the latest and most relevant news.
 2. **Curator Agent**: Filters and selects news based on user-defined preferences and interests.
 3. **Writer Agent**: Crafts engaging and reader-friendly articles.
-4. **Designer Agent**: Layouts and designs the articles for an aesthetically pleasing reading experience.
-5. **Editor Agent**: Constructs the newspaper based on produced articles.
-6. **Publisher Agent** Publishes the newspaper to the frontend or desired service
+4. **Critique Agent** Provide feedback to the writer until article is approved.
+5. **Designer Agent**: Layouts and designs the articles for an aesthetically pleasing reading experience.
+6. **Editor Agent**: Constructs the newspaper based on produced articles.
+7. **Publisher Agent** Publishes the newspaper to the frontend or desired service
 
 Each agent plays a critical role in delivering a unique and personalized newspaper experience.
 
