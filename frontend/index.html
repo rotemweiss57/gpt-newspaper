@@ -13,17 +13,18 @@
                 <h1>Gpt Newspaper</h1>
             </div>
             <p class="powered-by">Powered by <a href="https://tavily.com" target="_blank">Tavily</a></p>
-            <p>Select topics of interest and get your personalized newspaper.</p>
+            <p class = "topics-interest">Type topics of interest and get your personalized newspaper</p>
 
         </header>
         <section class="topic-selection">
             <form id="topicForm">
-                <p>Topics:</p>
+<!--                <p class = "topics">Topics:</p>-->
                 <div class="form-group" id="topicGroup1">
-                    <input type="text" id="topic1" name="topic1" required>
-                    <span class="icon add-topic">+</span>
-                    <span class="icon remove-topic">🗑️</span>
+                    <input class = "inputText" type="text" id="topic1" name="topic1" required>
+                    <span class="icon add-topic">---</span>
+                    <span class="icon remove-topic">-</span>
                 </div>
+<!--                🗑️-->
             </form>
             <button type="button" id="produceNewspaper">Produce Newspaper</button>
 
@@ -31,6 +32,7 @@
         </section>
 
         <section id="loading" class="hidden">
+                <div class="spinner"></div>
                 <div id="loadingMessages"></div>
         </section>
 
