@@ -23,18 +23,19 @@ header, .content, footer {
 }
 header {
     padding: 1em 0;
-    color: black;
+    color: #f2f2f2;
     text-align: center;
     font-family: 'Chomsky', serif;
 }
 .content {
     column-count: 2;
     column-gap: 2em;
-    background-color: white;
+    background-color: #f2f2f2;
+    border-radius: 10px;
     padding: 2em;
 }
 h1 {
-    font-size: 3em;
+    font-size: 4em;
     margin-bottom: 0.5em;
     color: white;
 }
@@ -42,10 +43,14 @@ h2 {
     font-size: 1.5em;
     margin-bottom: 0.3em;
 }
+h3 {
+    font-size: 1.5em;
+    margin-bottom: 0.3em;
+    color: white;
+}
 p {
     font-size: 1.1em;
     line-height: 1.6;
-    color: white;
 }
 .article img {
     max-width: 100%;
@@ -71,7 +76,7 @@ footer {
 <body>
     <header>
         <h1>GPT Newspaper</h1>
-        <p>{{date}}</p>
+        <h3>{{date}}</h3>
     </header>
     <div class="content">
         {{articles}}

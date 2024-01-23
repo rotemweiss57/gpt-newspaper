@@ -21,12 +21,12 @@ header, .content, footer {
     width: 80%;
     margin: auto;
     overflow: hidden;
+
 }
 
 header {
     padding: 1em 0;
-
-    color: white;
+    color: #f2f2f2;
     text-align: center;
     font-family: 'Chomsky', serif;
 }
@@ -34,11 +34,12 @@ header {
 .content {
     display: flex;
     flex-direction: column;
-    background-color: white;
+    border-radius: 10px;
+    background-color: #f2f2f2;
 }
 
 h1 {
-    font-size: 3em;
+    font-size: 4em;
     margin-bottom: 0.5em;
 }
 
@@ -46,6 +47,10 @@ h2 {
     font-size: 1em;
     margin-bottom: 0.3em;
 }
+h3 {
+    font-size: 1.5em;
+    margin-bottom: 0.3em;
+    color: white;
 
 p {
     font-size: 1.1em;
@@ -85,7 +90,7 @@ footer {
 <body>
     <header>
         <h1>GPT Newspaper</h1>
-        <p>{{date}}</p>
+        <h3>{{date}}</h3>
     </header>
     <div class="content">
         {{articles}}
