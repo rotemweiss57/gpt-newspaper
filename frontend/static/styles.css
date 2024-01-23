@@ -136,18 +136,18 @@ header {
 }
 
 .article {
-    width: 100%; /* Set to 100% to have a single column */
+    width: 100%;
     margin-bottom: 20px;
     box-sizing: border-box;
-    background-color: #2D3748; /* Background color for each article */
-    padding: 20px; /* Padding around each article */
-    border-radius: 8px; /* Border radius for rounded corners */
-    color: #E2E8F0; /* Text color */
+    background-color: #2D3748;
+    padding: 20px;
+    border-radius: 8px;
+    color: #E2E8F0;
 }
 
 
 #newspaper img {
-   width: 100%; /* Make sure images fill the container */
+   width: 100%;
    height: auto;
 }
 
@@ -165,6 +165,10 @@ header {
     justify-content: center;
     background-color: #1A202C;
     color: #E2E8F0;
+}
+
+.layout {
+    font-family: 'Gill Sans', sans-serif;
 }
 
 #produceNewspaper {
