@@ -1,5 +1,5 @@
 import os
-
+import re
 
 class DesignerAgent:
     def __init__(self, output_dir):
@@ -30,7 +30,8 @@ class DesignerAgent:
         return article
 
     def save_article_html(self, article):
-        filename = f"{article['query'].replace(' ', '_')}.html"
+        cleaned_query = re.sub(r'[\/:*?"<>|]', '_', article['query'])
+        filename = f"{cleaned_query.replace(' ', '_')}.html"
         path = os.path.join(self.output_dir, filename)
         with open(path, 'w') as file:
             file.write(article['html'])
