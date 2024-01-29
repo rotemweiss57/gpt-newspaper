@@ -30,8 +30,7 @@ class DesignerAgent:
         return article
 
     def save_article_html(self, article):
-        cleaned_query = re.sub(r'[\/:*?"<>|]', '_', article['query'])
-        filename = f"{cleaned_query.replace(' ', '_')}.html"
+        filename = re.sub(r'[\/:*?"<>| ]', '_', article['query'])
         path = os.path.join(self.output_dir, filename)
         with open(path, 'w') as file:
             file.write(article['html'])
