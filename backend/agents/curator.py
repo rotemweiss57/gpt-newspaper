@@ -30,7 +30,7 @@ class CuratorAgent:
         }]
 
         lc_messages = convert_openai_messages(prompt)
-        response = ChatOpenAI(model='gpt-4', max_retries=1).invoke(lc_messages).content
+        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1).invoke(lc_messages).content
         chosen_sources = response
         for i in sources:
             if i["url"] not in chosen_sources:
