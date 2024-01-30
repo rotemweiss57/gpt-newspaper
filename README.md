@@ -17,7 +17,7 @@ GPT Newspaper consists of six specialized sub-agents in LangChain's new [LangGra
 Each agent plays a critical role in delivering a unique and personalized newspaper experience.
 
 <div align="center">
-<img align="center" height="500" width="100%" src="https://tavily-media.s3.amazonaws.com/gpt-newspaper-architecture.png">
+<img align="center" height="500" src="https://tavily-media.s3.amazonaws.com/gpt-newspaper-architecture.png">
 </div>
 
 
