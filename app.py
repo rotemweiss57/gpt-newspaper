@@ -1,8 +1,12 @@
 from multiprocessing import Process
-from backend.server import backend_app
+
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
+from backend.server import backend_app
+
+load_dotenv()
 CORS(backend_app)
 
 
