@@ -52,7 +52,7 @@ https://github.com/assafelovic/gpt-newspaper/assets/91344214/7f265369-1293-4d95-
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/assafelovic/gpt-newspaper.git
+   git clone https://github.com/rotemweiss57/gpt-newspaper.git
     ```
 2. Export your API Keys
    ```sh
