@@ -1,8 +1,12 @@
 from multiprocessing import Process
-from backend.server import backend_app
+
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
+from backend.server import backend_app
+
+load_dotenv()
 CORS(backend_app)
 
 
@@ -22,10 +26,10 @@ def serve_outputs(path):
 
 
 def run_frontend():
-    frontend_app.run(port=5000)
+    frontend_app.run(host='0.0.0.0', port=5000)
 
 def run_backend():
-    backend_app.run(port=8000)
+    backend_app.run(host='0.0.0.0', port=8000)
 
 if __name__ == '__main__':
     # Start the backend server
