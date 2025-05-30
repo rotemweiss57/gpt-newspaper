@@ -1,0 +1,24 @@
+[project]
+name = "gpt-newspaper"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "black>=25.1.0",
+    "flask>=3.1.1",
+    "flask-cors>=6.0.0",
+    "json5>=0.12.0",
+    "langchain>=0.3.25",
+    "langchain-anthropic>=0.3.13",
+    "langchain-community>=0.3.24",
+    "langchain-mcp-adapters>=0.1.1",
+    "langchain-openai>=0.3.17",
+    "langgraph>=0.4.5",
+    "mcp[cli]>=1.9.0",
+    "openai>=1.81.0",
+    "pandas>=2.2.3",
+    "python-dotenv>=1.1.0",
+    "tavily-python>=0.7.2",
+]

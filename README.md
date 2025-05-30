@@ -53,25 +53,30 @@ https://github.com/assafelovic/gpt-newspaper/assets/91344214/7f265369-1293-4d95-
 1. Clone the repo
    ```sh
    git clone https://github.com/rotemweiss57/gpt-newspaper.git
-    ```
+   cd gpt-newspaper
+   ```
 2. Export your API Keys
    ```sh
-    export TAVILY_API_KEY=<YOUR_TAVILY_API_KEY>
-    export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
-    ```
-3. Install Requirements
-   ```sh
-   pip install -r requirements.txt
+   export TAVILY_API_KEY=<YOUR_TAVILY_API_KEY>
+   export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
    ```
-4. Run the app
+3. Install uv (if not already installed)
    ```sh
-    python app.py
-    ```
-5. Open the app in your browser
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+4. Install and sync dependencies using uv
    ```sh
-    http://localhost:5000/
-    ```
-6. Enjoy!
+   uv sync
+   ```
+5. Run the app using uv
+   ```sh
+   uv run app.py
+   ```
+6. Open the app in your browser
+   ```sh
+   http://localhost:5000/
+   ```
+7. Enjoy!
 
 ## 🤝 Contributing
 

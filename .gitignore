@@ -1,5 +1,7 @@
 # .gitignore
 
 .env
-
+.venv/
+backend/
+frontend/
 outputs/

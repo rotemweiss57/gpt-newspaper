@@ -1,6 +1,6 @@
 from datetime import datetime
-from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
+from langchain_community.adapters.openai import convert_openai_messages
+from langchain_anthropic import ChatAnthropic
 
 
 class CuratorAgent:
@@ -30,7 +30,7 @@ class CuratorAgent:
         }]
 
         lc_messages = convert_openai_messages(prompt)
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1).invoke(lc_messages).content
+        response = ChatAnthropic(model='claude-3-5-sonnet-20240620', max_retries=1).invoke(lc_messages).content
         chosen_sources = response
         for i in sources:
             if i["url"] not in chosen_sources:
