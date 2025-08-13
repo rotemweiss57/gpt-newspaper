@@ -1,5 +1,19 @@
 
 let selectedLayout = 'layout_1.html'; // Default layout
+let backendPort = 8000; // Default backend port
+
+// Fetch configuration on page load
+async function fetchConfig() {
+    try {
+        // Use current page's port (frontend server) to get backend port config
+        const response = await fetch(`${window.location.origin}/api/config`);
+        const config = await response.json();
+        backendPort = config.backendPort;
+        console.log('Backend port configured to:', backendPort);
+    } catch (error) {
+        console.warn('Could not fetch config, using default port:', backendPort);
+    }
+}
 
 function selectLayout(event) {
     document.querySelectorAll('.layout-icon').forEach(icon => {
@@ -33,7 +47,7 @@ function produceNewspaper() {
         layout: selectedLayout
     };
 
-    fetch('http://localhost:8000/generate_newspaper', {
+    fetch(`http://localhost:${backendPort}/generate_newspaper`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -78,7 +92,10 @@ function toggleLoading(isLoading) {
 
 let topicCount = 1;
 
-window.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('DOMContentLoaded', async (event) => {
+    // Fetch configuration first
+    await fetchConfig();
+    
     document.getElementById('produceNewspaper').addEventListener('click', produceNewspaper);
     document.querySelectorAll('.layout-icon').forEach(icon => {
         icon.addEventListener('click', selectLayout);
