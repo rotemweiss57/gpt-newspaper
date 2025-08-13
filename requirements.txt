@@ -1,5 +1,6 @@
-langchain
-langgraph
+langchain==0.1.20
+langgraph==0.0.32
+langchain-core==0.1.52
 tavily-python
 BeautifulSoup4
 openai

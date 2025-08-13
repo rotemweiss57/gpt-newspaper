@@ -1,11 +1,45 @@
-version: '3.8'
 services:
   gpt-newspaper:
     build:
       context: .
-    ports:
-      - "5000:5000"
-      - "8000:8000"
-
+      dockerfile: Dockerfile
+    container_name: gpt-newspaper-app
+    
+    # Use host networking for simplified port configuration
+    network_mode: host
+    
+    # Environment configuration
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT:-5000}
+      - BACKEND_PORT=${BACKEND_PORT:-8000}
+    
+    # Load environment variables from .env file
     env_file:
       - .env
+    
+    # Persistent volumes
+    volumes:
+      # Persistent storage for application data
+      - app_data:/app/outputs
+      # Optional: Mount source code for development (uncomment for dev mode)
+      # - .:/app:ro
+      
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT:-5000}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Named volumes for persistent data
+volumes:
+  app_data:
+
+# Optional: Network configuration for multi-service setup
+networks:
+  default:
+    name: gpt-newspaper-network

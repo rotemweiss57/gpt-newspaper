@@ -1,6 +1,6 @@
 from datetime import datetime
 from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
+from backend.model_config import get_chat_model
 import json5 as json
 
 sample_json = """
@@ -59,7 +59,8 @@ class WriterAgent:
             "response_format": {"type": "json_object"}
         }
 
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1, model_kwargs=optional_params).invoke(lc_messages).content
+        chat_model = get_chat_model(max_retries=1, model_kwargs=optional_params)
+        response = chat_model.invoke(lc_messages).content
         return json.loads(response)
 
     def revise(self, article: dict):
@@ -83,7 +84,8 @@ class WriterAgent:
             "response_format": {"type": "json_object"}
         }
 
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1, model_kwargs=optional_params).invoke(lc_messages).content
+        chat_model = get_chat_model(max_retries=1, model_kwargs=optional_params)
+        response = chat_model.invoke(lc_messages).content
         response = json.loads(response)
         print(f"For article: {article['title']}")
         print(f"Writer Revision Message: {response['message']}\n")
