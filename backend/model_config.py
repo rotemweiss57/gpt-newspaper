@@ -20,10 +20,8 @@ class ModelProvider:
             return self._get_openai_model(**kwargs)
         elif self.provider == 'openrouter':
             return self._get_openrouter_model(**kwargs)
-        elif self.provider == 'google':
-            return self._get_google_model(**kwargs)
         else:
-            raise ValueError(f"Unsupported provider: {self.provider}")
+            raise ValueError(f"Unsupported provider: {self.provider}. Supported providers: 'openai', 'openrouter'")
     
     def _get_openai_model(self, **kwargs) -> ChatOpenAI:
         """Configure OpenAI model"""
@@ -52,16 +50,6 @@ class ModelProvider:
             model_kwargs=kwargs.get('model_kwargs', {})
         )
     
-    def _get_google_model(self, **kwargs) -> ChatOpenAI:
-        """Configure Google model (placeholder for future implementation)"""
-        # Note: This would require langchain-google-genai package
-        # For now, fall back to OpenAI-compatible interface
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY environment variable is required for Google provider")
-        
-        # This is a placeholder - actual Google implementation would use different client
-        raise NotImplementedError("Google provider not yet implemented. Use 'openai' or 'openrouter'.")
 
 
 # Global model provider instance
