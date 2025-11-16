@@ -33,7 +33,7 @@ class DesignerAgent:
         filename = re.sub(r'[\/:*?"<>| ]', '_', article['query'])
         filename = f"{filename}.html"
         path = os.path.join(self.output_dir, filename)
-        with open(path, 'w') as file:
+        with open(path, 'w', encoding='utf-8') as file:
             file.write(article['html'])
         article["path"] = filename
         return article

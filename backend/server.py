@@ -11,6 +11,8 @@ def index():
 def generate_newspaper():
     data = request.json
     master_agent = MasterAgent()
-    newspaper = master_agent.run(data["topics"], data["layout"])
+    language = data.get("language", "english")  # Default to English if not specified
+    length = data.get("length", "standard")  # Default to standard if not specified
+    newspaper = master_agent.run(data["topics"], data["layout"], language, length)
     return jsonify({"path": newspaper}), 200
 

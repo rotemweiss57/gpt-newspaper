@@ -26,6 +26,26 @@
                     <span class="icon remove-topic">-</span>
                 </div>
             </form>
+    
+    <!-- Language Selection -->
+    <p class="layout">Select publication language</p>
+    <div class="language-selection">
+        <select id="languageSelect" class="language-dropdown">
+            <option value="english">English</option>
+            <option value="polish">Polish</option>
+        </select>
+    </div>
+    
+    <!-- Article Length Selection -->
+    <p class="layout">Length of articles</p>
+    <div class="length-selection">
+        <select id="lengthSelect" class="length-dropdown">
+            <option value="standard">Standard</option>
+            <option value="advanced">Advanced publication</option>
+        </select>
+    </div>
+    <p class="length-info" id="lengthInfo" style="display: none;">⚠️ Advanced mode: Maximum 1 topic (longer processing time)</p>
+    
     <p class = "layout">Select newspaper layout</p>
     <div class="layouts">
         <img src="static/layout_icons/layout_1.png" alt="Layout 1" class="layout-icon" data-layout="layout_1.html">

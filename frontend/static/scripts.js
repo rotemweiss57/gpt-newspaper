@@ -24,16 +24,30 @@ function produceNewspaper() {
         return;
     }
 
+    // Get selected language
+    const selectedLanguage = document.getElementById('languageSelect').value;
+    
+    // Get selected article length
+    const selectedLength = document.getElementById('lengthSelect').value;
+    
+    // Validate topic count for Advanced mode
+    if (selectedLength === 'advanced' && topics.length > 1) {
+        alert('Advanced mode is limited to 1 topic. Please remove extra topics or switch to Standard mode.');
+        return;
+    }
+
         // Show loading animation
     toggleLoading(true);
 
 
     const payload = {
         topics: topics,
-        layout: selectedLayout
+        layout: selectedLayout,
+        language: selectedLanguage,
+        length: selectedLength
     };
 
-    fetch('http://localhost:8000/generate_newspaper', {
+    fetch('/api/generate_newspaper', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -83,6 +97,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.layout-icon').forEach(icon => {
         icon.addEventListener('click', selectLayout);
     });
+    
+    // Add length selection change listener
+    document.getElementById('lengthSelect').addEventListener('change', handleLengthChange);
+    
     addIconToLastTopic();
 });
 
@@ -111,7 +129,37 @@ function addIconToLastTopic() {
     }
 }
 
+function handleLengthChange() {
+    const selectedLength = document.getElementById('lengthSelect').value;
+    const lengthInfo = document.getElementById('lengthInfo');
+    
+    if (selectedLength === 'advanced') {
+        // Show warning message
+        lengthInfo.style.display = 'block';
+        
+        // Remove extra topics if more than 1 exists
+        while (topicCount > 1) {
+            const topicGroup = document.getElementById('topicGroup' + topicCount);
+            if (topicGroup) {
+                topicGroup.remove();
+            }
+            topicCount--;
+        }
+        addIconToLastTopic();
+    } else {
+        // Hide warning message
+        lengthInfo.style.display = 'none';
+    }
+}
+
 function addTopicField() {
+    // Check if Advanced mode is selected
+    const selectedLength = document.getElementById('lengthSelect').value;
+    if (selectedLength === 'advanced') {
+        alert('Advanced mode is limited to 1 topic due to longer processing time.');
+        return;
+    }
+    
     topicCount++;
     const formGroup = document.createElement('div');
     formGroup.className = 'form-group';

@@ -3,3 +3,15 @@
 .env
 
 outputs/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
+*.pot
+*.mo
+*.coverage
+.pytest_cache/
+.mypy_cache/

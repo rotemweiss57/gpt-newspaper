@@ -7,7 +7,7 @@ class PublisherAgent:
 
     def save_newspaper_html(self, newspaper_html):
         path = os.path.join(self.output_dir, "newspaper.html")
-        with open(path, 'w') as file:
+        with open(path, 'w', encoding='utf-8') as file:
             file.write(newspaper_html)
         return path
 

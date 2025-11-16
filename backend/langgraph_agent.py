@@ -12,12 +12,12 @@ class MasterAgent:
         self.output_dir = f"outputs/run_{int(time.time())}"
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def run(self, queries: list, layout: str):
+    def run(self, queries: list, layout: str, language: str = "english", length: str = "standard"):
         # Initialize agents
         search_agent = SearchAgent()
         curator_agent = CuratorAgent()
-        writer_agent = WriterAgent()
-        critique_agent = CritiqueAgent()
+        writer_agent = WriterAgent(language, length)
+        critique_agent = CritiqueAgent(language)
         designer_agent = DesignerAgent(self.output_dir)
         editor_agent = EditorAgent(layout)
         publisher_agent = PublisherAgent(self.output_dir)
@@ -36,9 +36,11 @@ class MasterAgent:
         workflow.add_edge('search', 'curate')
         workflow.add_edge('curate', 'write')
         workflow.add_edge('write', 'critique')
-        workflow.add_conditional_edges(start_key='critique',
-                                       condition=lambda x: "accept" if x['critique'] is None else "revise",
-                                       conditional_edge_mapping={"accept": "design", "revise": "write"})
+        workflow.add_conditional_edges(
+            'critique',
+            lambda x: "accept" if x.get('critique') is None else "revise",
+            {"accept": "design", "revise": "write"}
+        )
 
         # set up start and end nodes
         workflow.set_entry_point("search")
