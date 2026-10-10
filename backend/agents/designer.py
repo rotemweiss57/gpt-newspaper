@@ -1,43 +1,38 @@
 import os
 import re
 
-class DesignerAgent:
-    def __init__(self, output_dir):
-        self.output_dir = output_dir
+from langgraph.runtime import Runtime
+
+from ..config import NewspaperContext
+from ..rendering import render
+from ..state import Article, ArticleState
+from .common import emit, today
 
 
-    def load_html_template(self):
-        relative_path = "../templates/article/index.html"
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        html_file_path = os.path.join(dir_path, relative_path)
-        with open(html_file_path) as f:
-            html_template = f.read()
-        return html_template
+def _slugify(text: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return slug[:60] or "article"
 
-    def designer(self, article):
-        html_template = self.load_html_template()
-        title = article["title"]
-        date = article["date"]
-        image = article["image"]
-        paragraphs = article["paragraphs"]
-        html_template = html_template.replace("{{title}}", title)
-        html_template = html_template.replace("{{image}}", image)
-        html_template = html_template.replace("{{date}}", date)
-        for i in range(5):
-            html_template = html_template.replace(f"{{paragraph{i + 1}}}", paragraphs[i])
-        article["html"] = html_template
-        article = self.save_article_html(article)
-        return article
 
-    def save_article_html(self, article):
-        filename = re.sub(r'[\/:*?"<>| ]', '_', article['query'])
-        filename = f"{filename}.html"
-        path = os.path.join(self.output_dir, filename)
-        with open(path, 'w') as file:
-            file.write(article['html'])
-        article["path"] = filename
-        return article
+async def designer_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
+    emit(state, "design", "Laying out the article")
+    article: Article = {
+        "query": state["query"],
+        "index": state.get("index", 0),
+        "title": state["title"],
+        "summary": state["summary"],
+        "paragraphs": state["paragraphs"],
+        "image": state["image"],
+        "sources": state["sources"],
+        "date": today(),
+        "revisions": state.get("revisions", 0),
+        "path": f"{state.get('index', 0) + 1:02d}-{_slugify(state['query'])}.html",
+    }
 
-    def run(self, article: dict):
-        article = self.designer(article)
-        return article
+    output_dir = runtime.context.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+    with open(os.path.join(output_dir, article["path"]), "w", encoding="utf-8") as f:
+        f.write(render("article.html", article=article))
+
+    emit(state, "done", "Ready")
+    return {"articles": [article]}

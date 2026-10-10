@@ -1,42 +1,36 @@
-from datetime import datetime
-from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
+from langgraph.runtime import Runtime
+
+from ..config import NewspaperContext
+from ..llm import get_chat_model
+from ..prompts import CURATOR_PROMPT
+from ..schemas import CuratedSources
+from ..state import ArticleState
+from .common import emit, format_sources, today
 
 
-class CuratorAgent:
-    def __init__(self):
-        pass
+async def curator_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
+    ctx = runtime.context
+    candidates = state["candidates"]
+    count = ctx.sources_per_article
 
-    def curate_sources(self, query: str, sources: list):
-        """
-        Curate relevant sources for a query
-        :param input:
-        :return:
-        """
-        prompt = [{
-            "role": "system",
-            "content": "You are a personal newspaper editor. Your sole purpose is to choose 5 most relevant article "
-                       "for me to read from a list of articles.\n "
-        }, {
-            "role": "user",
-            "content": f"Today's date is {datetime.now().strftime('%d/%m/%Y')}\n."
-                       f"Topic or Query: {query}\n"
-                       f"Your task is to return the 5 most relevant articles for me to read for the provided topic or "
-                       f"query\n "
-                       f"Here is a list of articles:\n"
-                       f"{sources}\n"
-                       f"Please return nothing but a list of the strings of the URLs in this structure: ['url1',"
-                       f"'url2','url3','url4','url5'].\n "
-        }]
+    if len(candidates) <= count:
+        emit(state, "curate", f"Keeping all {len(candidates)} sources")
+        return {"sources": candidates}
 
-        lc_messages = convert_openai_messages(prompt)
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1).invoke(lc_messages).content
-        chosen_sources = response
-        for i in sources:
-            if i["url"] not in chosen_sources:
-                sources.remove(i)
-        return sources
+    emit(state, "curate", f"Picking the best {count} of {len(candidates)} sources")
+    llm = get_chat_model(ctx.model, ctx.temperature).with_structured_output(CuratedSources)
+    chain = CURATOR_PROMPT | llm
+    result: CuratedSources = await chain.ainvoke({
+        "today": today(),
+        "query": state["query"],
+        "candidates": format_sources(candidates),
+        "count": count,
+    })
 
-    def run(self, article: dict):
-        article["sources"] = self.curate_sources(article["query"], article["sources"])
-        return article
+    # Keep the model's ranking, but only trust URLs that really came from the search
+    by_url = {c["url"]: c for c in candidates}
+    chosen = [by_url[url] for url in dict.fromkeys(result.urls) if url in by_url][:count]
+    if not chosen:
+        chosen = sorted(candidates, key=lambda c: c.get("score", 0), reverse=True)[:count]
+
+    return {"sources": chosen}

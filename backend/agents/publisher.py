@@ -1,16 +1,18 @@
 import os
 
+from langgraph.config import get_stream_writer
+from langgraph.runtime import Runtime
 
-class PublisherAgent:
-    def __init__(self, output_dir):
-        self.output_dir = output_dir
+from ..config import NewspaperContext
+from ..state import NewspaperState
 
-    def save_newspaper_html(self, newspaper_html):
-        path = os.path.join(self.output_dir, "newspaper.html")
-        with open(path, 'w') as file:
-            file.write(newspaper_html)
-        return path
 
-    def run(self, newspaper_html: str):
-        newspaper_path = self.save_newspaper_html(newspaper_html)
-        return newspaper_path
+def publisher_node(state: NewspaperState, runtime: Runtime[NewspaperContext]) -> dict:
+    output_dir = runtime.context.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "newspaper.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(state["newspaper_html"])
+
+    get_stream_writer()({"stage": "publish", "message": "Hot off the press"})
+    return {"newspaper_path": path}
