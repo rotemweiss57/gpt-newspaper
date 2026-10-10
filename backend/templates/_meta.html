@@ -1,0 +1,13 @@
+{# Social share previews. Expects title, description, image. #}
+<meta name="description" content="{{ description }}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="The GPT Newspaper">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+{% if image %}
+<meta property="og:image" content="{{ image }}">
+<meta name="twitter:card" content="summary_large_image">
+{% else %}
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta name="generator" content="GPT Newspaper (https://github.com/rotemweiss57/gpt-newspaper)">

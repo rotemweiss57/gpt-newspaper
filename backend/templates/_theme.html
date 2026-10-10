@@ -1,6 +1,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <style>
 :root {
     --paper: #f6f1e7;
@@ -45,7 +45,7 @@ img { display: block; max-width: 100%; }
 /* Masthead */
 .masthead { text-align: center; }
 .masthead .meta {
-    display: flex; justify-content: space-between; gap: 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
     font: 500 12px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
     border-bottom: 1px solid var(--rule); padding-bottom: 10px;
 }
@@ -60,21 +60,43 @@ img { display: block; max-width: 100%; }
 .masthead .tagline a { color: var(--accent); text-decoration: none; }
 .masthead .tagline a:hover { text-decoration: underline; }
 .double-rule { border: 0; border-top: 3px double var(--rule); margin: 0 0 28px; }
+.tool {
+    font: 600 11px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+    background: none; border: 0; padding: 0; cursor: pointer; text-decoration: none;
+}
+.tool:hover { text-decoration: underline; }
 
 .kicker {
     font: 600 11px/1 var(--ui); letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
     margin: 0 0 8px;
 }
-.headline { font-family: var(--headline); font-weight: 700; line-height: 1.15; margin: 0 0 10px; }
+.headline { font-family: var(--headline); font-weight: 700; line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
 .headline a { text-decoration: none; }
 .headline a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.summary { color: var(--ink-soft); margin: 0 0 10px; }
+.summary { color: var(--ink-soft); margin: 0 0 10px; text-wrap: pretty; }
 .read-more {
     font: 600 12px/1 var(--ui); letter-spacing: .06em; text-transform: uppercase;
     color: var(--accent); text-decoration: none;
 }
 .read-more:hover { text-decoration: underline; }
 .photo { width: 100%; object-fit: cover; background: var(--hairline); filter: saturate(.9); }
+.illustration .photo { filter: none; }
+.figure { display: block; position: relative; }
+/* Generated art is always labeled as such */
+.illustration::after {
+    content: "AI illustration"; position: absolute; inset-inline-start: 8px; bottom: 8px;
+    font: 600 9px/1 var(--ui); letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(246, 241, 231, .92); color: #1b1a17; padding: 4px 6px;
+}
+
+.editors-note {
+    max-width: 760px; margin: -6px auto 32px; text-align: center;
+    font: italic 400 19px/1.55 var(--body); color: var(--ink-soft);
+}
+.editors-note::before {
+    content: "From the editor"; display: block; margin-bottom: 8px;
+    font: 600 11px/1 var(--ui); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
 
 footer.colophon {
     margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--rule);
@@ -82,10 +104,23 @@ footer.colophon {
     font: 400 12px/1.4 var(--ui); color: var(--muted);
 }
 footer.colophon a { color: var(--muted); }
+code.model { font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 
 @media (max-width: 640px) {
     body { font-size: 17px; }
     .page { padding: 16px 16px 32px; }
-    .masthead .meta span:last-child { display: none; }
+    .masthead .meta .hide-sm { display: none; }
+}
+
+/* Paper in hand: print or "Save as PDF" */
+@media print {
+    :root { --paper: #fff; --paper-raised: #fff; --ink: #000; --ink-soft: #222; --muted: #555; --rule: #000; --hairline: #bbb; --accent: #000; }
+    @page { margin: 14mm; }
+    body { font-size: 11pt; }
+    .page { max-width: none; padding: 0; }
+    .no-print { display: none !important; }
+    a { text-decoration: none; }
+    article, figure, .story { break-inside: avoid; }
+    .photo { filter: grayscale(1) contrast(1.05); }
 }
 </style>
