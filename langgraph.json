@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "newspaper": "./backend/graph.py:graph"
+  },
+  "env": ".env"
+}

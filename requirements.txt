@@ -1,10 +1,13 @@
-langchain
-langgraph
-tavily-python
-BeautifulSoup4
-openai
-flask
-json5
-Flask-CORS
-langchain_openai
-python-dotenv
+langchain>=1.0
+langchain-core>=1.0
+langgraph>=1.0
+langchain-tavily>=0.2
+langchain-openai>=1.0
+fastapi>=0.115
+uvicorn[standard]>=0.30
+jinja2>=3.1
+pydantic>=2.7
+python-dotenv>=1.0
+
+# Optional: add the LangChain integration for any other provider you use, e.g.
+# langchain-anthropic   langchain-google-genai   langchain-ollama   langchain-groq   langchain-mistralai
