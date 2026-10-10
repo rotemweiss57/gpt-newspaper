@@ -65,7 +65,7 @@ def fake_search(monkeypatch):
     empty_topics = {"nothing here"}
     calls = []
 
-    async def _search(query, time_range):
+    async def _search(query, time_range, api_key=None):
         calls.append((query, time_range))
         if query in empty_topics:
             return {"results": [], "images": []}

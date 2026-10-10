@@ -146,9 +146,21 @@ input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1p
     cursor: pointer; width: fit-content;
     font: 600 12px/1 var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
 }
-.advanced[open] summary { margin-bottom: 14px; }
-.advanced .field { margin-bottom: 0; }
-.advanced input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; }
+.advanced[open] summary { margin-bottom: 16px; }
+.settings-status { letter-spacing: .04em; text-transform: none; font-weight: 500; margin-left: 6px; }
+.settings-status.needs-keys { color: var(--accent); }
+.settings-status.ready { color: var(--ok); }
+.settings { border-left: 2px solid var(--hairline); padding-left: 16px; }
+.settings .field { margin-bottom: 18px; }
+.advanced input[type="text"], .key-input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; }
+.key-input {
+    width: 100%; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--hairline); border-radius: 0; padding: 12px 14px;
+}
+.key-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.key-input.missing { border-color: var(--accent); }
+.remember { display: flex; align-items: center; gap: 8px; font: 500 14px/1.3 var(--ui); color: var(--ink-soft); cursor: pointer; }
+.remember input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
 .help { font: 400 13px/1.5 var(--ui); color: var(--muted); margin: 8px 0 0; }
 code { font-size: .92em; }
 

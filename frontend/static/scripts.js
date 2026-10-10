@@ -1,11 +1,23 @@
 const SUGGESTIONS = ['AI agents', 'Climate tech', 'Space exploration', 'Global markets', 'Formula 1', 'Health & science'];
 const STAGES = ['search', 'curate', 'write', 'review', 'design'];
 const STORAGE_KEY = 'gpt-newspaper:v2';
+const KEYS_STORAGE_KEY = 'gpt-newspaper:keys';
+
+const PROVIDER_NAMES = {
+    openai: 'OpenAI', anthropic: 'Anthropic', google_genai: 'Google', groq: 'Groq', mistralai: 'Mistral',
+    xai: 'xAI', deepseek: 'DeepSeek', openrouter: 'OpenRouter', together: 'Together', fireworks: 'Fireworks', ollama: 'Ollama',
+};
+const NAME_PREFIXES = [
+    ['gpt-', 'openai'], ['o1', 'openai'], ['o3', 'openai'], ['o4', 'openai'],
+    ['claude', 'anthropic'], ['gemini', 'google_genai'], ['mistral', 'mistralai'], ['grok', 'xai'],
+];
 
 const state = {
     topics: [],
     maxTopics: 6,
     defaultModel: '',
+    serverKeys: {},
+    keys: { tavily: '', providers: {} },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -18,6 +30,117 @@ function loadPrefs() {
 
 function savePrefs(prefs) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); } catch { /* private mode */ }
+}
+
+function loadKeys() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(KEYS_STORAGE_KEY));
+        if (saved) return { tavily: saved.tavily || '', providers: saved.providers || {} };
+    } catch { /* storage unavailable */ }
+    return { tavily: '', providers: {} };
+}
+
+function persistKeys() {
+    try {
+        if ($('rememberKeys').checked) localStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(state.keys));
+        else localStorage.removeItem(KEYS_STORAGE_KEY);
+    } catch { /* storage unavailable */ }
+}
+
+// ---------- model & keys ----------
+
+function currentModel() {
+    return $('modelInput').value.trim() || state.defaultModel;
+}
+
+function inferProvider(model) {
+    if (model.includes(':')) return model.split(':', 1)[0];
+    const match = NAME_PREFIXES.find(([prefix]) => model.toLowerCase().startsWith(prefix));
+    return match ? match[1] : null;
+}
+
+function providerName(provider) {
+    return PROVIDER_NAMES[provider] || provider || 'Model';
+}
+
+/** Which keys are still missing for the current model (server env or browser). */
+function missingKeys() {
+    const missing = [];
+    if (!state.keys.tavily && !state.serverKeys.tavily) missing.push('tavily');
+    const provider = inferProvider(currentModel());
+    const known = provider in state.serverKeys;
+    if (known && !state.serverKeys[provider] && !state.keys.providers[provider]) missing.push('provider');
+    return missing;
+}
+
+function renderKeys() {
+    const provider = inferProvider(currentModel());
+    const name = providerName(provider);
+    const missing = missingKeys();
+    // Tavily
+    const tavily = $('tavilyKey');
+    tavily.placeholder = state.serverKeys.tavily ? "Using the server's key" : 'tvly-…';
+    tavily.classList.toggle('missing', missing.includes('tavily'));
+    $('tavilyHelp').innerHTML = state.serverKeys.tavily
+        ? 'Optional. A key here overrides the server key.'
+        : 'Required. Get a free key at <a href="https://app.tavily.com" target="_blank" rel="noopener">tavily.com</a>.';
+
+    // Model provider
+    const field = $('providerKeyField');
+    const input = $('providerKey');
+    field.hidden = provider === 'ollama';
+    $('providerKeyLabel').textContent = `${name} API key`;
+    input.value = state.keys.providers[provider] || '';
+    input.dataset.provider = provider || '';
+    input.classList.toggle('missing', missing.includes('provider'));
+    if (state.serverKeys[provider]) {
+        input.placeholder = "Using the server's key";
+        $('providerKeyHelp').textContent = 'Optional. A key here overrides the server key.';
+    } else if (provider in state.serverKeys) {
+        input.placeholder = 'Required';
+        $('providerKeyHelp').textContent = `Required for ${name} models. It is saved per provider, so switching models keeps your other keys.`;
+    } else {
+        input.placeholder = 'Optional';
+        $('providerKeyHelp').textContent = 'Only needed if this provider expects an API key.';
+    }
+
+    renderStatus();
+}
+
+function renderStatus() {
+    const missing = missingKeys();
+    const status = $('settingsStatus');
+    status.textContent = missing.length ? '· keys needed' : '· ready';
+    status.className = `settings-status ${missing.length ? 'needs-keys' : 'ready'}`;
+}
+
+function setupKeys() {
+    state.keys = loadKeys();
+    $('tavilyKey').value = state.keys.tavily;
+
+    $('tavilyKey').addEventListener('input', (event) => {
+        state.keys.tavily = event.target.value.trim();
+        persistKeys();
+        $('tavilyKey').classList.toggle('missing', missingKeys().includes('tavily'));
+        renderStatus();
+    });
+    $('providerKey').addEventListener('input', (event) => {
+        const provider = event.target.dataset.provider;
+        if (!provider) return;
+        const value = event.target.value.trim();
+        if (value) state.keys.providers[provider] = value;
+        else delete state.keys.providers[provider];
+        persistKeys();
+        $('providerKey').classList.toggle('missing', missingKeys().includes('provider'));
+        renderStatus();
+    });
+    $('modelInput').addEventListener('input', renderKeys);
+    $('rememberKeys').addEventListener('change', persistKeys);
+}
+
+function openSettingsAt(missing) {
+    $('settings').open = true;
+    (missing[0] === 'provider' ? $('providerKey') : $('tavilyKey')).focus();
 }
 
 // ---------- topics ----------
@@ -203,9 +326,22 @@ async function produceNewspaper(event) {
         return;
     }
 
+    const missing = missingKeys();
+    if (missing.length) {
+        const what = missing.map((k) => (k === 'tavily' ? 'Tavily' : providerName(inferProvider(currentModel())))).join(' and ');
+        showError(`Add your ${what} API key to print an edition.`);
+        renderKeys();
+        openSettingsAt(missing);
+        return;
+    }
+
     const layout = document.querySelector('input[name="layout"]:checked').value;
-    const model = $('modelInput').value.trim() || state.defaultModel;
+    const model = currentModel();
     const topics = [...state.topics];
+    const provider = inferProvider(model);
+    const keys = {};
+    if (state.keys.tavily) keys.tavily_api_key = state.keys.tavily;
+    if (state.keys.providers[provider]) keys.api_key = state.keys.providers[provider];
     savePrefs({ topics, layout, model: model === state.defaultModel ? '' : model });
 
     $('submitButton').disabled = true;
@@ -216,7 +352,7 @@ async function produceNewspaper(event) {
         response = await fetch('/api/newspaper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ topics, layout, model }),
+            body: JSON.stringify({ topics, layout, model, ...keys }),
         });
     } catch {
         showError('Could not reach the server. Is it still running?');
@@ -225,7 +361,9 @@ async function produceNewspaper(event) {
     }
 
     if (!response.ok) {
-        showError(await readError(response));
+        const message = await readError(response);
+        showError(message);
+        if (/api key/i.test(message)) $('settings').open = true;
         $('submitButton').disabled = false;
         return;
     }
@@ -258,8 +396,9 @@ async function loadConfig() {
         const config = await (await fetch('/api/config')).json();
         state.defaultModel = config.model;
         state.maxTopics = config.max_topics;
+        state.serverKeys = config.server_keys || {};
         $('modelInput').placeholder = config.model;
-        $('advanced').hidden = !config.allow_model_override;
+        $('modelField').hidden = !config.allow_model_override;
     } catch {
         /* the form still works with server defaults */
     }
@@ -270,6 +409,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     $('today').textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     setupTopics();
+    setupKeys();
     $('composer').addEventListener('submit', produceNewspaper);
     $('againButton').addEventListener('click', showComposer);
 
@@ -283,4 +423,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     if (prefs.model) $('modelInput').value = prefs.model;
     renderTopics();
+    renderKeys();
+    if (missingKeys().length) $('settings').open = true;
 });

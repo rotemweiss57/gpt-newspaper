@@ -7,10 +7,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 ROOT_DIR = Path(__file__).resolve().parent.parent
 OUTPUTS_DIR = ROOT_DIR / "outputs"
+
+# Only this project's .env, never one picked up from a parent directory
+load_dotenv(ROOT_DIR / ".env")
 
 DEFAULT_MODEL = "openai:gpt-5.4-mini"
 
@@ -65,3 +66,6 @@ class NewspaperContext:
     sources_per_article: int = field(default_factory=lambda: get_settings().sources_per_article)
     news_time_range: str | None = field(default_factory=lambda: get_settings().news_time_range)
     output_dir: str = field(default_factory=new_run_dir)
+    # Keys supplied by the user for this run only; they override the server's env vars
+    api_key: str | None = field(default=None, repr=False)
+    tavily_api_key: str | None = field(default=None, repr=False)

@@ -11,15 +11,28 @@ from backend.llm import get_chat_model
 @pytest.fixture
 def client(tmp_path, monkeypatch, fake_llm, fake_search):
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-test")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")  # the default model's provider
     monkeypatch.setattr(server, "get_chat_model", lambda *a, **k: fake_llm)
     monkeypatch.setattr(graph_module, "OUTPUTS_DIR", tmp_path)
-    monkeypatch.setattr(server, "NewspaperContext", lambda model: graph_module.NewspaperContext(model=model, output_dir=str(tmp_path / "run")))
-    return TestClient(server.app)
+    contexts = []
+
+    def make_context(**kwargs):
+        contexts.append(graph_module.NewspaperContext(**kwargs, output_dir=str(tmp_path / "run")))
+        return contexts[-1]
+
+    monkeypatch.setattr(server, "NewspaperContext", make_context)
+    client = TestClient(server.app)
+    client.contexts = contexts
+    return client
 
 
 def test_config(client):
     body = client.get("/api/config").json()
     assert body["model"] and body["max_topics"] == server.MAX_TOPICS
+    # Reports which keys exist, never their values
+    assert body["server_keys"]["tavily"] is True
+    assert body["server_keys"]["ollama"] is True
+    assert "tvly-test" not in json.dumps(body)
 
 
 def test_frontend_is_served(client):
@@ -50,7 +63,25 @@ def test_rejects_bad_input(client):
 def test_missing_tavily_key(client, monkeypatch):
     monkeypatch.delenv("TAVILY_API_KEY")
     response = client.post("/api/newspaper", json={"topics": ["x"]})
-    assert response.status_code == 400 and "TAVILY_API_KEY" in response.json()["detail"]
+    assert response.status_code == 400 and "Tavily API key" in response.json()["detail"]
+
+
+def test_keys_from_the_ui_are_used_for_the_run(client, monkeypatch):
+    monkeypatch.delenv("TAVILY_API_KEY")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    response = client.post("/api/newspaper", json={
+        "topics": ["x"], "model": "anthropic:claude-sonnet-5-5", "api_key": " sk-ant-ui ", "tavily_api_key": "tvly-ui",
+    })
+    assert json.loads(response.text.splitlines()[-1])["type"] == "done"
+    context = client.contexts[-1]
+    assert (context.api_key, context.tavily_api_key) == ("sk-ant-ui", "tvly-ui")
+    assert "sk-ant-ui" not in repr(context)
+
+
+def test_missing_model_key(client, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    response = client.post("/api/newspaper", json={"topics": ["x"], "model": "anthropic:claude-sonnet-5-5"})
+    assert response.status_code == 400 and "ANTHROPIC_API_KEY" in response.json()["detail"]
 
 
 def test_unknown_model_provider(client, monkeypatch):

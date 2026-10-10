@@ -10,7 +10,7 @@ Built on [LangGraph](https://github.com/langchain-ai/langgraph) and [LangChain](
 
 ## ✨ What's new in v2
 
-- **Bring any model.** Choose models with a single `provider:model` string, through LangChain's `init_chat_model`. You can set a server default or change it per edition in the UI.
+- **Bring any model, and your own keys.** Choose models with a single `provider:model` string, through LangChain's `init_chat_model`. You can set a server default or pick a model and enter API keys per edition in the UI.
 - **Live newsroom.** The UI streams real progress from the graph: every topic, every stage, and the back-and-forth between the writer and the editor.
 - **Structured outputs.** Agents return typed Pydantic objects through `with_structured_output`. Fragile "return only JSON" prompting and `json5` parsing are gone.
 - **Modern LangGraph.** `StateGraph` with typed state, a per-topic subgraph, parallel fan-out with the `Send` API, runtime context, and a capped revision loop so the critic can't loop forever.
@@ -61,12 +61,13 @@ flowchart LR
 git clone https://github.com/rotemweiss57/gpt-newspaper.git
 cd gpt-newspaper
 
-cp .env.dist .env          # then add your keys
 pip install -r requirements.txt
 python app.py
 ```
 
-Open **http://localhost:8000** and print your first edition.
+Open **http://localhost:8000**, add your keys under **Model & API keys**, and print your first edition.
+
+Keys entered in the UI stay in your browser. They go to the server with each request and are used only for that edition, never saved on the server. To configure keys on the server instead (for example, for a shared deployment), copy `.env.dist` to `.env` and fill it in. Keys entered in the UI override the server's keys.
 
 <details>
 <summary>Using <code>uv</code> instead</summary>
@@ -111,6 +112,8 @@ curl -N localhost:8000/api/newspaper \
   -H 'Content-Type: application/json' \
   -d '{"topics": ["AI agents", "Space exploration"], "layout": "layout_3", "model": "anthropic:claude-sonnet-5-5"}'
 ```
+
+`api_key` (for the model's provider) and `tavily_api_key` are optional. When you send them, they override the server's keys for that request.
 
 ```json
 {"type": "progress", "topic": "AI agents", "index": 0, "stage": "search", "message": "Found 10 stories"}

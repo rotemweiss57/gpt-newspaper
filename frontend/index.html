@@ -64,21 +64,41 @@
                     </div>
                 </section>
 
-                <details class="advanced" id="advanced" hidden>
-                    <summary>Model</summary>
-                    <div class="field">
-                        <label class="label" for="modelInput">LangChain model</label>
-                        <input id="modelInput" type="text" list="modelOptions" spellcheck="false">
-                        <datalist id="modelOptions">
-                            <option value="openai:gpt-5.4-mini">
-                            <option value="openai:gpt-5.5">
-                            <option value="anthropic:claude-sonnet-5-5">
-                            <option value="anthropic:claude-haiku-4-5">
-                            <option value="google_genai:gemini-2.5-flash">
-                            <option value="groq:llama-3.3-70b-versatile">
-                            <option value="ollama:llama3.1">
-                        </datalist>
-                        <p class="help">Any <code>provider:model</code> that LangChain's <code>init_chat_model</code> supports. The server needs that provider's package and API key.</p>
+                <details class="advanced" id="settings">
+                    <summary>Model &amp; API keys <span class="settings-status" id="settingsStatus"></span></summary>
+                    <div class="settings">
+                        <div class="field" id="modelField">
+                            <label class="label" for="modelInput">LangChain model</label>
+                            <input id="modelInput" type="text" list="modelOptions" spellcheck="false" autocomplete="off">
+                            <datalist id="modelOptions">
+                                <option value="openai:gpt-5.4-mini">
+                                <option value="openai:gpt-5.5">
+                                <option value="anthropic:claude-sonnet-5-5">
+                                <option value="anthropic:claude-haiku-4-5">
+                                <option value="google_genai:gemini-2.5-flash">
+                                <option value="groq:llama-3.3-70b-versatile">
+                                <option value="ollama:llama3.1">
+                            </datalist>
+                            <p class="help">Any <code>provider:model</code> that LangChain's <code>init_chat_model</code> supports. The server needs that provider's package installed.</p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="tavilyKey">Tavily API key</label>
+                            <input id="tavilyKey" class="key-input" type="password" spellcheck="false" autocomplete="off" placeholder="tvly-…">
+                            <p class="help" id="tavilyHelp"></p>
+                        </div>
+
+                        <div class="field" id="providerKeyField">
+                            <label class="label" for="providerKey" id="providerKeyLabel">Model API key</label>
+                            <input id="providerKey" class="key-input" type="password" spellcheck="false" autocomplete="off">
+                            <p class="help" id="providerKeyHelp"></p>
+                        </div>
+
+                        <label class="remember">
+                            <input type="checkbox" id="rememberKeys" checked>
+                            Remember keys in this browser
+                        </label>
+                        <p class="help">Keys are sent to this server with each request and used only for that edition. They are never saved on the server.</p>
                     </div>
                 </details>
 

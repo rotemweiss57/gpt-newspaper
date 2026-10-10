@@ -14,7 +14,7 @@ def _clean_paragraphs(paragraphs: list[str]) -> list[str]:
 
 async def write(state: ArticleState, ctx: NewspaperContext) -> dict:
     emit(state, "write", "Drafting the article")
-    llm = get_chat_model(ctx.model, ctx.temperature).with_structured_output(ArticleDraft)
+    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(ArticleDraft)
     draft: ArticleDraft = await (WRITER_PROMPT | llm).ainvoke({
         "today": today(),
         "query": state["query"],
@@ -31,7 +31,7 @@ async def write(state: ArticleState, ctx: NewspaperContext) -> dict:
 async def revise(state: ArticleState, ctx: NewspaperContext) -> dict:
     revision_number = state.get("revisions", 0) + 1
     emit(state, "write", f"Revising the article (round {revision_number})")
-    llm = get_chat_model(ctx.model, ctx.temperature).with_structured_output(ArticleRevision)
+    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(ArticleRevision)
     revision: ArticleRevision = await (REVISE_PROMPT | llm).ainvoke({
         "today": today(),
         "query": state["query"],

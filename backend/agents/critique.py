@@ -17,7 +17,7 @@ async def critique_node(state: ArticleState, runtime: Runtime[NewspaperContext])
 
     emit(state, "review", "Editor is reviewing the draft")
     writer_note = state.get("writer_note")
-    llm = get_chat_model(ctx.model, ctx.temperature).with_structured_output(Critique)
+    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(Critique)
     review: Critique = await (CRITIQUE_PROMPT | llm).ainvoke({
         "today": today(),
         "query": state["query"],

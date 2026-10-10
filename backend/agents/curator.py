@@ -18,7 +18,7 @@ async def curator_node(state: ArticleState, runtime: Runtime[NewspaperContext]) 
         return {"sources": candidates}
 
     emit(state, "curate", f"Picking the best {count} of {len(candidates)} sources")
-    llm = get_chat_model(ctx.model, ctx.temperature).with_structured_output(CuratedSources)
+    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(CuratedSources)
     chain = CURATOR_PROMPT | llm
     result: CuratedSources = await chain.ainvoke({
         "today": today(),

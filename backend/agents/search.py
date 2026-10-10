@@ -13,13 +13,15 @@ FALLBACK_IMAGE = (
 )
 
 
-@lru_cache
-def get_search_tool(time_range: str | None) -> TavilySearch:
+@lru_cache(maxsize=16)
+def get_search_tool(time_range: str | None, api_key: str | None = None) -> TavilySearch:
+    kwargs = {"tavily_api_key": api_key} if api_key else {}
     return TavilySearch(
         topic="news",
         max_results=10,
         include_images=True,
         time_range=time_range,
+        **kwargs,
     )
 
 
@@ -28,9 +30,9 @@ def _is_web_url(url: str | None) -> bool:
     return bool(url) and url.startswith(("https://", "http://"))
 
 
-async def _search(query: str, time_range: str | None) -> dict:
+async def _search(query: str, time_range: str | None, api_key: str | None = None) -> dict:
     try:
-        response = await get_search_tool(time_range).ainvoke({"query": query})
+        response = await get_search_tool(time_range, api_key).ainvoke({"query": query})
     except ToolException:
         # langchain-tavily raises when there are no results
         return {"results": [], "images": []}
@@ -42,12 +44,13 @@ async def _search(query: str, time_range: str | None) -> dict:
 async def search_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
     query = state["query"]
     time_range = runtime.context.news_time_range
+    api_key = runtime.context.tavily_api_key
     emit(state, "search", f"Searching the news for “{query}”")
 
-    response = await _search(query, time_range)
+    response = await _search(query, time_range, api_key)
     if not response.get("results") and time_range:
         emit(state, "search", f"Nothing in the last {time_range}, widening the search")
-        response = await _search(query, None)
+        response = await _search(query, None, api_key)
 
     candidates: list[Source] = [
         {

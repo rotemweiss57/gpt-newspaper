@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, StringConstraints, field_validator
 from .agents import NoArticlesError
 from .config import OUTPUTS_DIR, ROOT_DIR, NewspaperContext, get_settings
 from .graph import stream_newspaper
-from .llm import get_chat_model
+from .llm import PROVIDER_KEY_ENV, get_chat_model, has_server_key, infer_provider
 from .state import Layout
 
 logger = logging.getLogger("gpt_newspaper")
@@ -19,12 +19,16 @@ logger = logging.getLogger("gpt_newspaper")
 MAX_TOPICS = 6
 
 Topic = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+ApiKey = Annotated[str, StringConstraints(strip_whitespace=True, max_length=500)]
 
 
 class NewspaperRequest(BaseModel):
     topics: list[Topic] = Field(min_length=1, max_length=MAX_TOPICS)
     layout: Layout = "layout_1"
     model: str | None = Field(default=None, description='Any LangChain model string, e.g. "anthropic:claude-sonnet-5-5"')
+    # Optional bring-your-own keys. Used for this run only, never stored or logged.
+    api_key: ApiKey | None = Field(default=None, description="API key for the model's provider")
+    tavily_api_key: ApiKey | None = None
 
     @field_validator("layout", mode="before")
     @classmethod
@@ -43,6 +47,11 @@ def config() -> dict:
         "model": settings.llm_model,
         "allow_model_override": settings.allow_model_override,
         "max_topics": MAX_TOPICS,
+        # Only whether a key is configured, never the key itself
+        "server_keys": {
+            "tavily": bool(os.getenv("TAVILY_API_KEY")),
+            **{provider: has_server_key(provider) for provider in PROVIDER_KEY_ENV},
+        },
     }
 
 
@@ -52,15 +61,22 @@ def build_context(request: NewspaperRequest) -> NewspaperContext:
     model = (request.model or "").strip() or settings.llm_model
     if model != settings.llm_model and not settings.allow_model_override:
         raise HTTPException(403, "Choosing a model per run is disabled on this server.")
-    if not os.getenv("TAVILY_API_KEY"):
-        raise HTTPException(400, "TAVILY_API_KEY is not set. Get a free key at https://tavily.com.")
+    tavily_api_key = request.tavily_api_key or None
+    if not tavily_api_key and not os.getenv("TAVILY_API_KEY"):
+        raise HTTPException(400, "Add your Tavily API key under “Model & API keys” (free at https://tavily.com).")
+
+    api_key = request.api_key or None
+    provider = infer_provider(model)
+    if not api_key and provider in PROVIDER_KEY_ENV and not has_server_key(provider):
+        raise HTTPException(400, f"Add your {provider} API key under “Model & API keys”, or set {PROVIDER_KEY_ENV[provider]} on the server.")
+
     try:
-        get_chat_model(model, settings.llm_temperature)
+        get_chat_model(model, settings.llm_temperature, api_key)
     except ImportError as e:
         raise HTTPException(400, f"Missing LangChain integration for “{model}”: {e}") from e
     except Exception as e:
         raise HTTPException(400, f"Could not load model “{model}”: {e}") from e
-    return NewspaperContext(model=model)
+    return NewspaperContext(model=model, api_key=api_key, tavily_api_key=tavily_api_key)
 
 
 @app.post("/api/newspaper")
