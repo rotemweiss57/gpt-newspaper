@@ -73,22 +73,7 @@ to `./outputs`.
 
 ## 🗞️ How the newsroom works
 
-```mermaid
-flowchart TB
-    T(["Your topics"]) -->|"one reporter per topic, all in parallel"| R
-    subgraph R["Reporter"]
-        direction LR
-        A["Assignment editor"] --> S["Search"] --> C["Curator"] --> W["Writer"] --> K["Critic"] --> I["Art director"] --> D["Designer"]
-        C -.->|"nothing on-topic? search further back"| S
-        K -.->|"revise"| W
-    end
-    R --> M
-    subgraph M["Front page"]
-        direction LR
-        E["Editor-in-chief"] --> P["Publisher"]
-    end
-    M --> N(["Your newspaper"])
-```
+<p align="center"><img src="docs/images/newsroom.svg" alt="Topics fan out to parallel reporters (assignment editor, search, curator, writer, critic, art director, designer), whose finished stories go to the editor-in-chief and publisher" width="880"></p>
 
 | Agent | Job |
 |---|---|

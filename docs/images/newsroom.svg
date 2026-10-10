@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 372" width="900" height="372" role="img" aria-labelledby="title desc">
+  <title id="title">How the GPT Newspaper newsroom works</title>
+  <desc id="desc">Each topic gets its own reporter, running in parallel: assignment editor, search, curator, writer, critic, art director and designer. The curator can send the reporter back to search further back in time, and the critic can send drafts back to the writer. Finished stories go to the editor-in-chief and the publisher, who produce your newspaper.</desc>
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1b1a17"/>
+    </marker>
+    <marker id="accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#a3341f"/>
+    </marker>
+    <style>
+      .label { font: 600 13px Helvetica, Arial, sans-serif; fill: #1b1a17; text-anchor: middle; dominant-baseline: central; }
+      .note { font: italic 12.5px Georgia, 'Times New Roman', serif; fill: #3d3a34; }
+      .loop { font: italic 12px Georgia, 'Times New Roman', serif; fill: #a3341f; text-anchor: middle; }
+      .kicker { font: 700 10.5px Helvetica, Arial, sans-serif; letter-spacing: 1.6px; fill: #a3341f; }
+      .node { fill: #fbf8f1; stroke: #1b1a17; stroke-width: 1.2; }
+      .pill { fill: #1b1a17; }
+      .pill-label { font: 600 13px Helvetica, Arial, sans-serif; fill: #f6f1e7; text-anchor: middle; dominant-baseline: central; }
+      .edge { stroke: #1b1a17; stroke-width: 1.3; fill: none; marker-end: url(#ink); }
+      .back { stroke: #a3341f; stroke-width: 1.3; fill: none; stroke-dasharray: 4 3; marker-end: url(#accent); }
+    </style>
+  </defs>
+
+  <!-- Paper -->
+  <rect width="900" height="372" rx="6" fill="#f6f1e7"/>
+
+  <!-- Your topics -->
+  <rect class="pill" x="385" y="18" width="130" height="32" rx="16"/>
+  <text class="pill-label" x="450" y="34">Your topics</text>
+  <path class="edge" d="M450 50V96"/>
+  <text class="note" x="462" y="78">one reporter per topic, all in parallel</text>
+
+  <!-- Reporters: stacked sheets suggest one per topic -->
+  <rect x="32" y="114" width="848" height="124" fill="#efe7d6" stroke="#d8cfbf"/>
+  <rect x="26" y="108" width="848" height="124" fill="#f3ecdd" stroke="#d8cfbf"/>
+  <rect x="20" y="102" width="848" height="124" fill="#f6f1e7" stroke="#1b1a17" stroke-width="1.2"/>
+  <text class="kicker" x="34" y="122">REPORTER</text>
+
+  <!-- Reporter pipeline -->
+  <g>
+    <rect class="node" x="32" y="150" width="104" height="42"/><text class="label" x="84" y="171"><tspan x="84" dy="-8">Assignment</tspan><tspan x="84" dy="16">editor</tspan></text>
+    <rect class="node" x="154" y="150" width="104" height="42"/><text class="label" x="206" y="171">Search</text>
+    <rect class="node" x="276" y="150" width="104" height="42"/><text class="label" x="328" y="171">Curator</text>
+    <rect class="node" x="398" y="150" width="104" height="42"/><text class="label" x="450" y="171">Writer</text>
+    <rect class="node" x="520" y="150" width="104" height="42"/><text class="label" x="572" y="171">Critic</text>
+    <rect class="node" x="642" y="150" width="104" height="42"/><text class="label" x="694" y="171">Art director</text>
+    <rect class="node" x="764" y="150" width="92" height="42"/><text class="label" x="810" y="171">Designer</text>
+
+    <path class="edge" d="M136 171H152"/>
+    <path class="edge" d="M258 171H274"/>
+    <path class="edge" d="M380 171H396"/>
+    <path class="edge" d="M502 171H518"/>
+    <path class="edge" d="M624 171H640"/>
+    <path class="edge" d="M746 171H762"/>
+  </g>
+
+  <!-- Feedback loops -->
+  <path class="back" d="M328 150C328 128 206 128 206 148"/>
+  <text class="loop" x="267" y="127">nothing on-topic? dig further back</text>
+  <path class="back" d="M572 192C572 216 450 216 450 194"/>
+  <text class="loop" x="511" y="222">revise</text>
+
+  <!-- Front page -->
+  <path class="edge" d="M450 226V284"/>
+  <text class="note" x="462" y="262">finished stories</text>
+  <rect class="node" x="250" y="288" width="140" height="42"/><text class="label" x="320" y="309">Editor-in-chief</text>
+  <rect class="node" x="410" y="288" width="112" height="42"/><text class="label" x="466" y="309">Publisher</text>
+  <path class="edge" d="M390 309H408"/>
+  <path class="edge" d="M522 309H548"/>
+  <rect class="pill" x="550" y="293" width="150" height="32" rx="16"/>
+  <text class="pill-label" x="625" y="309">Your newspaper</text>
+</svg>
