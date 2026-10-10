@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} · The GPT Newspaper</title>
+    <meta name="description" content="{{ article.summary }}">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    {% include "_theme.html" %}
+    <style>
+        .page { max-width: 760px; }
+        .masthead h1 { font-size: 40px; margin: 14px 0 12px; }
+        .article-header { margin: 8px 0 24px; }
+        .article-header .headline { font-size: clamp(32px, 5vw, 48px); font-weight: 800; }
+        .dek { font-size: 21px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 16px; }
+        .byline {
+            font: 500 12px/1.4 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+            padding: 10px 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
+        }
+        figure { margin: 0 0 28px; }
+        figure .photo { aspect-ratio: 16 / 9; }
+        .body p { margin: 0 0 1.1em; }
+        .body p:first-child::first-letter {
+            float: left; font: 800 4.1em/.82 var(--headline); padding: 6px 10px 0 0; color: var(--ink);
+        }
+        .sources { margin-top: 40px; padding: 20px 22px; background: var(--paper-raised); border: 1px solid var(--hairline); }
+        .sources h2 { font: 600 12px/1 var(--ui); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 12px; color: var(--muted); }
+        .sources ol { margin: 0; padding-left: 20px; font-size: 16px; }
+        .sources li { margin: 0 0 8px; }
+        .sources a { text-decoration: none; }
+        .sources a:hover { text-decoration: underline; }
+        .sources .domain { font: 500 12px/1 var(--ui); color: var(--muted); margin-left: 6px; }
+        .back { font: 600 12px/1 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="masthead">
+            <div class="meta">
+                <a class="back" href="newspaper.html">← Today's edition</a>
+                <span>{{ article.date }}</span>
+            </div>
+            <h1><a href="newspaper.html">The GPT Newspaper</a></h1>
+            <hr class="double-rule">
+        </header>
+
+        <article>
+            <header class="article-header">
+                <p class="kicker">{{ article.query }}</p>
+                <h1 class="headline">{{ article.title }}</h1>
+                <p class="dek">{{ article.summary }}</p>
+                <div class="byline">
+                    By the GPT Newspaper newsroom · {{ article.date }} · {{ article.sources|length }} sources
+                </div>
+            </header>
+
+            <figure>
+                <img class="photo" src="{{ article.image }}" alt="" referrerpolicy="no-referrer" onerror="this.closest('figure').remove()">
+            </figure>
+
+            <div class="body">
+                {% for paragraph in article.paragraphs %}
+                <p>{{ paragraph }}</p>
+                {% endfor %}
+            </div>
+
+            {% if article.sources %}
+            <section class="sources">
+                <h2>Sources</h2>
+                <ol>
+                    {% for source in article.sources %}
+                    <li>
+                        <a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title or source.url }}</a>
+                        <span class="domain">{{ source.url|domain }}</span>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+        </article>
+
+        <footer class="colophon">
+            <span>Generated with AI from the sources above. Verify before you rely on it.</span>
+            <a href="newspaper.html">Back to today's edition →</a>
+        </footer>
+    </div>
+</body>
+</html>

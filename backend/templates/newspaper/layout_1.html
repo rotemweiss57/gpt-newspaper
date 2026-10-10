@@ -1,0 +1,26 @@
+{# Classic: flowing newspaper columns #}
+{% extends "newspaper/base.html" %}
+
+{% block styles %}
+.columns { column-count: 3; column-gap: 36px; column-rule: 1px solid var(--hairline); }
+.story { break-inside: avoid; margin: 0 0 32px; }
+.story .photo { aspect-ratio: 3 / 2; margin-bottom: 12px; }
+.story .headline { font-size: 26px; }
+.story:first-child .headline { font-size: 32px; }
+@media (max-width: 960px) { .columns { column-count: 2; } }
+@media (max-width: 640px) { .columns { column-count: 1; } }
+{% endblock %}
+
+{% block articles %}
+<div class="columns">
+    {% for article in articles %}
+    <article class="story">
+        {% include "newspaper/_photo.html" %}
+        <p class="kicker">{{ article.query }}</p>
+        <h2 class="headline"><a href="{{ article.path }}">{{ article.title }}</a></h2>
+        <p class="summary">{{ article.summary }}</p>
+        <a class="read-more" href="{{ article.path }}">Read the full story →</a>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}

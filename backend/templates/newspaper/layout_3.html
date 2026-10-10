@@ -1,0 +1,48 @@
+{# Front page: one lead story, the rest in a grid below #}
+{% extends "newspaper/base.html" %}
+
+{% block styles %}
+.lead {
+    display: grid; grid-template-columns: 3fr 2fr; gap: 36px; align-items: center;
+    padding-bottom: 32px; margin-bottom: 32px; border-bottom: 1px solid var(--rule);
+}
+.lead .photo { aspect-ratio: 16 / 10; }
+.lead .headline { font-size: clamp(32px, 4vw, 46px); font-weight: 800; }
+.lead .summary { font-size: 20px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px 36px; }
+.grid .story { padding-top: 4px; }
+.grid .photo { aspect-ratio: 3 / 2; margin-bottom: 12px; }
+.grid .headline { font-size: 23px; }
+@media (max-width: 960px) {
+    .lead { grid-template-columns: 1fr; gap: 18px; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+{% endblock %}
+
+{% block articles %}
+{% set lead = articles[0] %}
+<article class="lead">
+    {% with article = lead %}{% include "newspaper/_photo.html" %}{% endwith %}
+    <div>
+        <p class="kicker">{{ lead.query }}</p>
+        <h2 class="headline"><a href="{{ lead.path }}">{{ lead.title }}</a></h2>
+        <p class="summary">{{ lead.summary }}</p>
+        <a class="read-more" href="{{ lead.path }}">Read the full story →</a>
+    </div>
+</article>
+
+{% if articles|length > 1 %}
+<div class="grid">
+    {% for article in articles[1:] %}
+    <article class="story">
+        {% include "newspaper/_photo.html" %}
+        <p class="kicker">{{ article.query }}</p>
+        <h3 class="headline"><a href="{{ article.path }}">{{ article.title }}</a></h3>
+        <p class="summary">{{ article.summary }}</p>
+        <a class="read-more" href="{{ article.path }}">Read the full story →</a>
+    </article>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

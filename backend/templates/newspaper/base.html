@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GPT Newspaper · {{ date }}</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    {% include "_theme.html" %}
+    <style>{% block styles %}{% endblock %}</style>
+</head>
+<body>
+    <div class="page">
+        <header class="masthead">
+            <div class="meta">
+                <span>{{ date }}</span>
+                <span>Personalized edition · {{ articles|length }} {{ "story" if articles|length == 1 else "stories" }}</span>
+            </div>
+            <h1><a href="/">The GPT Newspaper</a></h1>
+            <p class="tagline">Researched by <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a>, written &amp; edited by a newsroom of <a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">LangGraph</a> agents</p>
+            <hr class="double-rule">
+        </header>
+
+        <main>
+            {% block articles %}{% endblock %}
+        </main>
+
+        <footer class="colophon">
+            <span>Generated with AI. Read the sources before you rely on anything here.</span>
+            <a href="/">Print another edition →</a>
+        </footer>
+    </div>
+</body>
+</html>
