@@ -36,14 +36,6 @@ front page in about a minute. Every claim is cited.
 - **Bring your own keys** in the UI (they stay in your browser), or configure them on the server.
 - **Web app, API, CLI and LangGraph Studio**, from one codebase.
 
-<div align="center">
-<img src="docs/images/risograph.jpg" alt="The same newsroom in the Risograph illustration style" width="900">
-<br><sub>Same newsroom, Risograph house style. Every image is generated per story and labeled.</sub>
-<br><br>
-<img src="docs/images/composer.jpg" alt="Choosing topics, layout, illustration style and language" width="440">
-<img src="docs/images/newsroom.jpg" alt="The live newsroom" width="440">
-</div>
-
 ## 🚀 Quick start
 
 You need Python 3.11+, a free [Tavily API key](https://app.tavily.com), and a key for your model
@@ -57,7 +49,7 @@ python app.py
 ```
 
 Open **http://localhost:8000**, add your keys under **Model & API keys**, pick some topics, and press
-**Print my newspaper** (or <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>Enter</kbd>).
+**Print my newspaper**.
 
 <details>
 <summary><b>With uv</b></summary>
@@ -81,20 +73,7 @@ to `./outputs`.
 
 ## 🗞️ How the newsroom works
 
-```mermaid
-flowchart LR
-    T((Your topics)) -->|one reporter per topic, in parallel| A
-    subgraph R [Reporter subgraph]
-        A[🧭 Assignment editor] --> S[🔎 Search]
-        S --> C[🗂️ Curator]
-        C -. nothing on-topic: look further back .-> S
-        C --> W[✍️ Writer]
-        W --> K[🧐 Critic]
-        K -- revise --> W
-        K -- approve --> I[🎨 Art director] --> D[📐 Designer]
-    end
-    D --> E[📰 Editor-in-chief] --> P[🗞️ Publisher] --> N((Your newspaper))
-```
+<p align="center"><img src="docs/images/newsroom.svg" alt="Topics fan out to parallel reporters (assignment editor, search, curator, writer, critic, art director, designer), whose finished stories go to the editor-in-chief and publisher" width="880"></p>
 
 | Agent | Job |
 |---|---|
