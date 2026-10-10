@@ -16,7 +16,7 @@ If it's not an urgent bug fix, you should branch from `master` and work on the f
 Make your changes following best practices for coding in the project's language. 
 
 3. **Test your changes.**
-Make sure your changes pass all the tests if there are any. If the project doesn't have automated testing infrastructure, test your changes manually to confirm they behave as expected.
+Run the test suite with `pytest` (install the dev tools with `pip install pytest pytest-asyncio httpx`, or `uv sync`). The tests run the whole agent graph against a fake model and fake search, so no API keys are needed. For UI changes, also run `python app.py` and check the change in the browser.
 
 4. **Follow the coding style.**
 Ensure your code adheres to the coding conventions used throughout the project, that includes indentation, accurate comments, etc.
