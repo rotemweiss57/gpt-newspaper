@@ -20,8 +20,14 @@ PROVIDER_KEY_ENV: dict[str, str | None] = {
 }
 
 _NAME_PREFIXES = {
-    "gpt-": "openai", "o1": "openai", "o3": "openai", "o4": "openai",
-    "claude": "anthropic", "gemini": "google_genai", "mistral": "mistralai", "grok": "xai",
+    "gpt-": "openai",
+    "o1": "openai",
+    "o3": "openai",
+    "o4": "openai",
+    "claude": "anthropic",
+    "gemini": "google_genai",
+    "mistral": "mistralai",
+    "grok": "xai",
 }
 
 

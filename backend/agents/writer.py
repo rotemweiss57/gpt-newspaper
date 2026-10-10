@@ -1,49 +1,55 @@
 from langgraph.runtime import Runtime
 
 from ..config import NewspaperContext
-from ..llm import get_chat_model
 from ..prompts import REVISE_PROMPT, WRITER_PROMPT
 from ..schemas import ArticleDraft, ArticleRevision
 from ..state import ArticleState
-from .common import emit, format_article, format_sources, today
+from .common import chat_model, emit, format_article, format_sources, today
 
 
-def _clean_paragraphs(paragraphs: list[str]) -> list[str]:
+def _clean(paragraphs: list[str]) -> list[str]:
     return [p.strip() for p in paragraphs if p and p.strip()]
 
 
 async def write(state: ArticleState, ctx: NewspaperContext) -> dict:
-    emit(state, "write", "Drafting the article")
-    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(ArticleDraft)
-    draft: ArticleDraft = await (WRITER_PROMPT | llm).ainvoke({
-        "today": today(),
-        "query": state["query"],
-        "sources": format_sources(state["sources"]),
-    })
+    count = len(state["sources"])
+    emit(state, "write", f"Drafting from {count} {'source' if count == 1 else 'sources'}")
+    draft: ArticleDraft = await (WRITER_PROMPT | chat_model(ctx, ArticleDraft)).ainvoke(
+        {
+            "today": today(),
+            "language": ctx.language,
+            "query": state["query"],
+            "sources": format_sources(state["sources"], full_text=True),
+        }
+    )
     return {
         "title": draft.title.strip(),
         "summary": draft.summary.strip(),
-        "paragraphs": _clean_paragraphs(draft.paragraphs),
+        "paragraphs": _clean(draft.paragraphs),
+        "highlight": draft.highlight.strip(),
         "revisions": 0,
     }
 
 
 async def revise(state: ArticleState, ctx: NewspaperContext) -> dict:
     revision_number = state.get("revisions", 0) + 1
-    emit(state, "write", f"Revising the article (round {revision_number})")
-    llm = get_chat_model(ctx.model, ctx.temperature, ctx.api_key).with_structured_output(ArticleRevision)
-    revision: ArticleRevision = await (REVISE_PROMPT | llm).ainvoke({
-        "today": today(),
-        "query": state["query"],
-        "sources": format_sources(state["sources"]),
-        "article": format_article(state),
-        "critique": state["critique"],
-    })
+    emit(state, "write", f"Revising the draft (round {revision_number})")
+    revision: ArticleRevision = await (REVISE_PROMPT | chat_model(ctx, ArticleRevision)).ainvoke(
+        {
+            "today": today(),
+            "language": ctx.language,
+            "query": state["query"],
+            "sources": format_sources(state["sources"], full_text=True),
+            "article": format_article(state),
+            "critique": state["critique"],
+        }
+    )
     emit(state, "write", f"Writer: {revision.message}")
     return {
         "title": revision.title.strip() or state["title"],
         "summary": revision.summary.strip() or state["summary"],
-        "paragraphs": _clean_paragraphs(revision.paragraphs) or state["paragraphs"],
+        "paragraphs": _clean(revision.paragraphs) or state["paragraphs"],
+        "highlight": revision.highlight.strip() or state.get("highlight", ""),
         "writer_note": revision.message,
         "critique": None,
         "revisions": revision_number,
