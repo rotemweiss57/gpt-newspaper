@@ -16,7 +16,7 @@ If it's not an urgent bug fix, you should branch from `master` and work on the f
 Make your changes following best practices for coding in the project's language. 
 
 3. **Test your changes.**
-Make sure your changes pass all the tests if there are any. If the project doesn't have automated testing infrastructure, test your changes manually to confirm they behave as expected.
+Run `uv sync`, then `uv run pytest` and `uv run ruff check . && uv run ruff format --check .` (or install `pre-commit` and run `pre-commit install` to do it on every commit). The tests run the whole agent graph against a fake model, fake search and fake image provider, so no API keys are needed. For UI or template changes, also run `python app.py`, print an edition, and attach a screenshot to your PR.
 
 4. **Follow the coding style.**
 Ensure your code adheres to the coding conventions used throughout the project, that includes indentation, accurate comments, etc.

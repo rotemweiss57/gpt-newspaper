@@ -1,42 +1,42 @@
-from datetime import datetime
-from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
+from langgraph.runtime import Runtime
+
+from ..config import NewspaperContext
+from ..prompts import CURATOR_PROMPT
+from ..schemas import CuratedSources
+from ..state import ArticleState
+from .common import chat_model, emit, format_images, format_sources, today, widen
 
 
-class CuratorAgent:
-    def __init__(self):
-        pass
+async def curator_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
+    """Keep only sources that are really about the topic, and pick the photo."""
+    ctx = runtime.context
+    candidates, images = state["candidates"], state.get("images", [])
+    emit(state, "curate", f"Reading {len(candidates)} stories, keeping the best")
 
-    def curate_sources(self, query: str, sources: list):
-        """
-        Curate relevant sources for a query
-        :param input:
-        :return:
-        """
-        prompt = [{
-            "role": "system",
-            "content": "You are a personal newspaper editor. Your sole purpose is to choose 5 most relevant article "
-                       "for me to read from a list of articles.\n "
-        }, {
-            "role": "user",
-            "content": f"Today's date is {datetime.now().strftime('%d/%m/%Y')}\n."
-                       f"Topic or Query: {query}\n"
-                       f"Your task is to return the 5 most relevant articles for me to read for the provided topic or "
-                       f"query\n "
-                       f"Here is a list of articles:\n"
-                       f"{sources}\n"
-                       f"Please return nothing but a list of the strings of the URLs in this structure: ['url1',"
-                       f"'url2','url3','url4','url5'].\n "
-        }]
+    result: CuratedSources = await (CURATOR_PROMPT | chat_model(ctx, CuratedSources)).ainvoke(
+        {
+            "today": today(),
+            "query": state["query"],
+            "candidates": format_sources(candidates),
+            "images": format_images(images),
+            "count": ctx.sources_per_article,
+        }
+    )
 
-        lc_messages = convert_openai_messages(prompt)
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1).invoke(lc_messages).content
-        chosen_sources = response
-        for i in sources:
-            if i["url"] not in chosen_sources:
-                sources.remove(i)
-        return sources
+    # Keep the model's ranking, but only trust URLs that really came from the search
+    by_url = {c["url"]: c for c in candidates}
+    chosen = [by_url[url] for url in dict.fromkeys(result.urls) if url in by_url][: ctx.sources_per_article]
+    if result.urls and not chosen:
+        # The model answered but mangled every URL: fall back to search ranking
+        chosen = candidates[: ctx.sources_per_article]
 
-    def run(self, article: dict):
-        article["sources"] = self.curate_sources(article["query"], article["sources"])
-        return article
+    image_urls = {img["url"] for img in images}
+    image = result.image_url if result.image_url in image_urls else ""
+
+    if chosen:
+        emit(state, "curate", f"Kept {len(chosen)} of {len(candidates)} stories")
+        return {"sources": chosen, "image": image}
+    if retry := widen(state, "Nothing on-topic yet"):
+        return {"sources": [], **retry}
+    emit(state, "skipped", "Nothing in the news is really about this topic yet")
+    return {"sources": []}

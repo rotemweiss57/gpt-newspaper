@@ -1,98 +1,62 @@
-from datetime import datetime
-from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
-import json5 as json
+from langgraph.runtime import Runtime
 
-sample_json = """
-{
-  "title": title of the article,
-  "date": today's date,
-  "paragraphs": [
-    "paragraph 1",
-    "paragraph 2",
-    "paragraph 3",
-    "paragraph 4",
-    "paragraph 5",
-    ],
-    "summary": "2 sentences summary of the article"
-}
-"""
-
-sample_revise_json = """
-{
-    "paragraphs": [
-        "paragraph 1",
-        "paragraph 2",
-        "paragraph 3",
-        "paragraph 4",
-        "paragraph 5",
-    ],
-    "message": "message to the critique"
-}
-"""
+from ..config import NewspaperContext
+from ..prompts import REVISE_PROMPT, WRITER_PROMPT
+from ..schemas import ArticleDraft, ArticleRevision
+from ..state import ArticleState
+from .common import chat_model, emit, format_article, format_sources, today
 
 
-class WriterAgent:
-    def __init__(self):
-        pass
+def _clean(paragraphs: list[str]) -> list[str]:
+    return [p.strip() for p in paragraphs if p and p.strip()]
 
-    def writer(self, query: str, sources: list):
 
-        prompt = [{
-            "role": "system",
-            "content": "You are a newspaper writer. Your sole purpose is to write a well-written article about a "
-                       "topic using a list of articles.\n "
-        }, {
-            "role": "user",
-            "content": f"Today's date is {datetime.now().strftime('%d/%m/%Y')}\n."
-                       f"Query or Topic: {query}"
-                       f"{sources}\n"
-                       f"Your task is to write a critically acclaimed article for me about the provided query or "
-                       f"topic based on the sources.\n "
-                       f"Please return nothing but a JSON in the following format:\n"
-                       f"{sample_json}\n "
-
-        }]
-
-        lc_messages = convert_openai_messages(prompt)
-        optional_params = {
-            "response_format": {"type": "json_object"}
+async def write(state: ArticleState, ctx: NewspaperContext) -> dict:
+    count = len(state["sources"])
+    emit(state, "write", f"Drafting from {count} {'source' if count == 1 else 'sources'}")
+    draft: ArticleDraft = await (WRITER_PROMPT | chat_model(ctx, ArticleDraft)).ainvoke(
+        {
+            "today": today(),
+            "language": ctx.language,
+            "query": state["query"],
+            "sources": format_sources(state["sources"], full_text=True),
         }
+    )
+    return {
+        "title": draft.title.strip(),
+        "summary": draft.summary.strip(),
+        "paragraphs": _clean(draft.paragraphs),
+        "highlight": draft.highlight.strip(),
+        "revisions": 0,
+    }
 
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1, model_kwargs=optional_params).invoke(lc_messages).content
-        return json.loads(response)
 
-    def revise(self, article: dict):
-        prompt = [{
-            "role": "system",
-            "content": "You are a newspaper editor. Your sole purpose is to edit a well-written article about a "
-                       "topic based on given critique\n "
-        }, {
-            "role": "user",
-            "content": f"{str(article)}\n"
-                        f"Your task is to edit the article based on the critique given.\n "
-                        f"Please return json format of the 'paragraphs' and a new 'message' field"
-                        f"to the critique that explain your changes or why you didn't change anything.\n"
-                        f"please return nothing but a JSON in the following format:\n"
-                        f"{sample_revise_json}\n "
-
-        }]
-
-        lc_messages = convert_openai_messages(prompt)
-        optional_params = {
-            "response_format": {"type": "json_object"}
+async def revise(state: ArticleState, ctx: NewspaperContext) -> dict:
+    revision_number = state.get("revisions", 0) + 1
+    emit(state, "write", f"Revising the draft (round {revision_number})")
+    revision: ArticleRevision = await (REVISE_PROMPT | chat_model(ctx, ArticleRevision)).ainvoke(
+        {
+            "today": today(),
+            "language": ctx.language,
+            "query": state["query"],
+            "sources": format_sources(state["sources"], full_text=True),
+            "article": format_article(state),
+            "critique": state["critique"],
         }
+    )
+    emit(state, "write", f"Writer: {revision.message}")
+    return {
+        "title": revision.title.strip() or state["title"],
+        "summary": revision.summary.strip() or state["summary"],
+        "paragraphs": _clean(revision.paragraphs) or state["paragraphs"],
+        "highlight": revision.highlight.strip() or state.get("highlight", ""),
+        "writer_note": revision.message,
+        "critique": None,
+        "revisions": revision_number,
+    }
 
-        response = ChatOpenAI(model='gpt-4-0125-preview', max_retries=1, model_kwargs=optional_params).invoke(lc_messages).content
-        response = json.loads(response)
-        print(f"For article: {article['title']}")
-        print(f"Writer Revision Message: {response['message']}\n")
-        return response
 
-    def run(self, article: dict):
-        critique = article.get("critique")
-        if critique is not None:
-            article.update(self.revise(article))
-        else:
-            article.update(self.writer(article["query"], article["sources"]))
-        return article
+async def writer_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
+    if state.get("critique"):
+        return await revise(state, runtime.context)
+    return await write(state, runtime.context)

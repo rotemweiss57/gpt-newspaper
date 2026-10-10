@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang }}" dir="{{ page.dir }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} · The GPT Newspaper</title>
+    {% with title = article.title, description = article.summary|strip_citations, image = article.image %}
+    {% include "_meta.html" %}
+    {% endwith %}
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    {% include "_theme.html" %}
+    <style>
+        .page { max-width: 760px; }
+        .masthead h1 { font-size: 40px; margin: 14px 0 12px; }
+        .article-header { margin: 8px 0 24px; }
+        .article-header .headline { font-size: clamp(32px, 5vw, 48px); font-weight: 800; }
+        .dek { font-size: 21px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 16px; text-wrap: pretty; }
+        .byline {
+            display: flex; flex-wrap: wrap; gap: 4px 14px;
+            font: 500 12px/1.4 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+            padding: 10px 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
+        }
+        .byline code { text-transform: none; letter-spacing: 0; }
+        figure { margin: 0 0 28px; }
+        figure .photo { aspect-ratio: 16 / 9; }
+        figcaption { font: 500 11px/1.4 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+        figcaption code { text-transform: none; letter-spacing: 0; }
+        .body p { margin: 0 0 1.1em; text-wrap: pretty; }
+        .body > p:first-child::first-letter {
+            float: inline-start; font: 800 4.1em/.82 var(--headline); padding: 6px 10px 0 0; color: var(--ink);
+        }
+        .cite a {
+            font: 600 .62em/1 var(--ui); color: var(--accent); text-decoration: none;
+            padding: 0 .15em; margin-inline-start: 1px;
+        }
+        .cite a:hover { text-decoration: underline; }
+        .pull-quote {
+            margin: 1.4em 0; padding: .9em 0; border-top: 3px double var(--rule); border-bottom: 1px solid var(--rule);
+            font: italic 700 clamp(22px, 3vw, 27px)/1.35 var(--headline); text-align: center; text-wrap: balance;
+        }
+        .sources { margin-top: 40px; padding: 20px 22px; background: var(--paper-raised); border: 1px solid var(--hairline); }
+        .sources h2 { font: 600 12px/1 var(--ui); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 14px; color: var(--muted); }
+        .sources ol { margin: 0; padding: 0; list-style: none; counter-reset: source; font-size: 16px; }
+        .sources li { counter-increment: source; display: grid; grid-template-columns: 26px 1fr; gap: 8px; margin: 0 0 12px; scroll-margin-top: 24px; }
+        .sources li::before { content: counter(source); font: 600 13px/1.6 var(--ui); color: var(--accent); }
+        .sources li:target { outline: 2px solid var(--accent); outline-offset: 6px; }
+        .sources a { text-decoration: none; }
+        .sources a:hover { text-decoration: underline; }
+        .source-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; font: 500 12px/1 var(--ui); color: var(--muted); }
+        .source-meta img { width: 14px; height: 14px; border-radius: 3px; }
+        @media print { .sources { border: 0; padding: 0; } .pull-quote { border-color: #000; } }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="masthead">
+            <div class="meta">
+                <a class="tool no-print" href="newspaper.html">← Today's edition</a>
+                <span>{{ article.date }}</span>
+                <button class="tool no-print" type="button" onclick="window.print()">Print</button>
+            </div>
+            <h1><a href="newspaper.html">The GPT Newspaper</a></h1>
+            <hr class="double-rule">
+        </header>
+
+        <article>
+            <header class="article-header">
+                <p class="kicker">{{ article.query }}</p>
+                <h1 class="headline" dir="auto">{{ article.title }}</h1>
+                <p class="dek" dir="auto">{{ article.summary|strip_citations }}</p>
+                <div class="byline">
+                    <span>Written by <code>{{ model }}</code></span>
+                    <span>{{ article.reading_minutes }} min read</span>
+                    <span>{{ article.sources|length }} sources</span>
+                    {% if article.revisions %}<span>{{ article.revisions }} {{ "revision" if article.revisions == 1 else "revisions" }} after editor review</span>{% endif %}
+                </div>
+            </header>
+
+            {% if article.image %}
+            <figure>
+                <img class="photo" src="{{ article.image }}" alt="{{ article.image_alt }}" referrerpolicy="no-referrer" onerror="this.closest('figure').remove()">
+                {% if article.illustrated %}<figcaption>AI illustration · <code>{{ image_model }}</code></figcaption>{% endif %}
+            </figure>
+            {% endif %}
+
+            <div class="body" dir="auto">
+                {% for paragraph in article.paragraphs %}
+                <p>{{ paragraph|cite(article.sources|length) }}</p>
+                {% if loop.index == article.pull_quote_at %}
+                <blockquote class="pull-quote">{{ article.highlight|strip_citations }}</blockquote>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if article.sources %}
+            <section class="sources" aria-labelledby="sources-title">
+                <h2 id="sources-title">Sources</h2>
+                <ol>
+                    {% for source in article.sources %}
+                    <li id="source-{{ loop.index }}">
+                        <div>
+                            <a href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.title or source.url }}</a>
+                            <div class="source-meta">
+                                {% if source.favicon %}<img src="{{ source.favicon }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">{% endif %}
+                                <span>{{ source.url|domain }}</span>
+                                {% if source.published_date %}<span>· {{ source.published_date[:16] }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+        </article>
+
+        <footer class="colophon">
+            <span>AI-generated from the sources above. Verify before you rely on it.</span>
+            <a class="no-print" href="newspaper.html">Back to today's edition →</a>
+        </footer>
+    </div>
+</body>
+</html>

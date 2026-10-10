@@ -3,52 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Custom Newspaper</title>
-    <link rel="stylesheet" href="static/styles.css">
+    <title>The GPT Newspaper</title>
+    <meta name="description" content="A personalized newspaper researched by Tavily and written by a newsroom of LangGraph agents.">
     <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;0,800;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <h1>Gpt Newspaper</h1>
+    <div class="page">
+        <header class="masthead">
+            <div class="meta">
+                <span id="today"></span>
+                <span>Your news, your edition</span>
             </div>
-            <p class="powered-by">Powered by <a href="https://tavily.com" target="_blank">Tavily</a></p>
-            <p class = "topics-interest">Type topics of interest and get your personalized newspaper</p>
-
+            <h1>The GPT Newspaper</h1>
+            <p class="tagline">
+                Researched by <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a>,
+                written &amp; edited by a newsroom of <a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">LangGraph</a> agents
+            </p>
+            <hr class="double-rule">
         </header>
 
-        <section class="topic-selection">
-            <form id="topicForm">
-                <div class="form-group" id="topicGroup1">
-                    <input class = "inputText" type="text" id="topic1" name="topic1" required>
-                    <span class="icon add-topic">---</span>
-                    <span class="icon remove-topic">-</span>
-                </div>
+        <main>
+            <!-- Compose -->
+            <form id="composer" class="panel" autocomplete="off">
+                <section class="field">
+                    <label class="label" for="topicInput">What should we cover?</label>
+                    <div class="topic-box" id="topicBox">
+                        <ul class="chips" id="chips" aria-live="polite"></ul>
+                        <input id="topicInput" type="text" maxlength="200" placeholder="Type a topic and press Enter">
+                    </div>
+                    <div class="suggestions" id="suggestions">
+                        <span class="hint">Try</span>
+                    </div>
+                </section>
+
+                <section class="field">
+                    <span class="label" id="layoutLabel">Choose a layout</span>
+                    <div class="layouts" role="radiogroup" aria-labelledby="layoutLabel">
+                        <label class="layout-card">
+                            <input type="radio" name="layout" value="layout_1" checked>
+                            <span class="preview preview-classic" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                            <span class="layout-name">Classic</span>
+                            <span class="layout-desc">Flowing columns</span>
+                        </label>
+                        <label class="layout-card">
+                            <input type="radio" name="layout" value="layout_2">
+                            <span class="preview preview-digest" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <span class="layout-name">Digest</span>
+                            <span class="layout-desc">Quick to scan</span>
+                        </label>
+                        <label class="layout-card">
+                            <input type="radio" name="layout" value="layout_3">
+                            <span class="preview preview-front" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                            <span class="layout-name">Front page</span>
+                            <span class="layout-desc">One lead story</span>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="field">
+                    <span class="label" id="imagesLabel">Images</span>
+                    <div class="styles" role="radiogroup" aria-labelledby="imagesLabel" id="imageStyles">
+                        <label class="style-card">
+                            <input type="radio" name="images" value="ink" checked>
+                            <span class="swatch swatch-ink" aria-hidden="true"></span>
+                            <span class="style-name">Ink</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="engraving">
+                            <span class="swatch swatch-engraving" aria-hidden="true"></span>
+                            <span class="style-name">Engraving</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="risograph">
+                            <span class="swatch swatch-risograph" aria-hidden="true"></span>
+                            <span class="style-name">Risograph</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="photos">
+                            <span class="swatch swatch-photos" aria-hidden="true"></span>
+                            <span class="style-name">News photos</span>
+                        </label>
+                    </div>
+                    <p class="help" id="imagesHelp">AI illustrations in the paper's house style, labeled as such.</p>
+                </section>
+
+                <section class="field">
+                    <label class="label" for="languageSelect">Language</label>
+                    <select id="languageSelect" class="select"><option value="en">English</option></select>
+                </section>
+
+                <details class="advanced" id="settings">
+                    <summary>Model &amp; API keys <span class="settings-status" id="settingsStatus"></span></summary>
+                    <div class="settings">
+                        <div class="field" id="modelField">
+                            <label class="label" for="modelInput">LangChain model</label>
+                            <input id="modelInput" type="text" list="modelOptions" spellcheck="false" autocomplete="off">
+                            <datalist id="modelOptions">
+                                <option value="openai:gpt-5.4-mini">
+                                <option value="openai:gpt-5.5">
+                                <option value="anthropic:claude-sonnet-5-5">
+                                <option value="anthropic:claude-haiku-4-5">
+                                <option value="google_genai:gemini-2.5-flash">
+                                <option value="groq:llama-3.3-70b-versatile">
+                                <option value="ollama:llama3.1">
+                            </datalist>
+                            <p class="help">Any <code>provider:model</code> that LangChain's <code>init_chat_model</code> supports. The server needs that provider's package installed.</p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="tavilyKey">Tavily API key</label>
+                            <input id="tavilyKey" class="key-input" type="password" spellcheck="false" autocomplete="off" placeholder="tvly-…">
+                            <p class="help" id="tavilyHelp"></p>
+                        </div>
+
+                        <div class="field" id="providerKeyField">
+                            <label class="label" for="providerKey" id="providerKeyLabel">Model API key</label>
+                            <input id="providerKey" class="key-input" type="password" spellcheck="false" autocomplete="off">
+                            <p class="help" id="providerKeyHelp"></p>
+                        </div>
+
+                        <div class="field" id="imageKeyField" hidden>
+                            <label class="label" for="imageKey">OpenAI API key · for illustrations</label>
+                            <input id="imageKey" class="key-input" type="password" spellcheck="false" autocomplete="off" placeholder="Optional">
+                            <p class="help">Illustrations are drawn by OpenAI's image model. Without a key, the paper uses news photos.</p>
+                        </div>
+
+                        <label class="remember">
+                            <input type="checkbox" id="rememberKeys" checked>
+                            Remember keys in this browser
+                        </label>
+                        <p class="help">Keys are sent to this server with each request and used only for that edition. They are never saved on the server.</p>
+                    </div>
+                </details>
+
+                <p class="error" id="formError" role="alert" hidden></p>
+
+                <button type="submit" class="primary" id="submitButton">Print my newspaper <kbd class="shortcut" id="shortcutHint">⌘ Enter</kbd></button>
             </form>
-    <p class = "layout">Select newspaper layout</p>
-    <div class="layouts">
-        <img src="static/layout_icons/layout_1.png" alt="Layout 1" class="layout-icon" data-layout="layout_1.html">
-        <img src="static/layout_icons/layout_2.png" alt="Layout 2" class="layout-icon" data-layout="layout_2.html">
-        <img src="static/layout_icons/layout_3.png" alt="Layout 3" class="layout-icon" data-layout="layout_3.html">
+
+            <!-- Newsroom -->
+            <section id="newsroom" class="panel" hidden aria-live="polite">
+                <div class="newsroom-head">
+                    <h2>In the newsroom</h2>
+                    <span class="model-tag"><span id="modelTag"></span> · <span id="elapsed">0:00</span></span>
+                </div>
+                <ol class="stages-legend" aria-hidden="true">
+                    <li>Plan</li><li>Search</li><li>Curate</li><li>Write</li><li>Review</li><li>Design</li>
+                </ol>
+                <ul class="desks" id="desks"></ul>
+                <p class="press" id="press"></p>
+
+                <div class="fresh" id="fresh" hidden>
+                    <p class="label">Fresh off the desk</p>
+                    <div class="fresh-grid" id="freshGrid"></div>
+                </div>
+
+                <div class="result" id="result" hidden>
+                    <p class="result-title" id="resultTitle"></p>
+                    <div class="result-actions">
+                        <a class="primary" id="readLink" href="#">Read your newspaper →</a>
+                        <button type="button" class="secondary" id="copyButton">Copy link</button>
+                        <button type="button" class="secondary" id="againButton">New edition</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="archive" id="archive" hidden aria-labelledby="archiveTitle">
+                <h2 class="archive-title" id="archiveTitle">Recent editions</h2>
+                <div class="archive-grid" id="archiveGrid"></div>
+            </section>
+        </main>
+
+        <footer class="colophon">
+            <span>Open source · <a href="https://github.com/rotemweiss57/gpt-newspaper" target="_blank" rel="noopener">GitHub</a></span>
+            <span>AI-generated news. Always check the sources.</span>
+        </footer>
     </div>
 
-            <button type="button" id="produceNewspaper">Produce Newspaper</button>
-
-
-        </section>
-
-        <section id="loading" class="hidden">
-                <div class="spinner"></div>
-                <div id="loadingMessages"></div>
-        </section>
-
-
-
-        <section id="newspaper" class="hidden">
-            <!-- The newspaper articles will be populated here -->
-        </section>
-    </div>
+    <template id="deskTemplate">
+        <li class="desk">
+            <div class="desk-top">
+                <span class="desk-topic"></span>
+                <ol class="steps"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+            </div>
+            <p class="desk-status">Waiting for a reporter…</p>
+        </li>
+    </template>
 
     <script src="static/scripts.js"></script>
 </body>

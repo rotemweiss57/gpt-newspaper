@@ -1,37 +1,40 @@
-from datetime import datetime
-from langchain.adapters.openai import convert_openai_messages
-from langchain_openai import ChatOpenAI
+from langgraph.runtime import Runtime
 
-class CritiqueAgent:
-    def __init__(self):
-        pass
+from ..config import NewspaperContext
+from ..prompts import CRITIQUE_PROMPT
+from ..schemas import Critique
+from ..state import ArticleState
+from .common import chat_model, emit, format_article, format_sources, today
 
-    def critique(self, article: dict):
-        prompt = [{
-            "role": "system",
-            "content": "You are a newspaper writing critique. Your sole purpose is to provide short feedback on a written "
-                       "article so the writer will know what to fix.\n "
-        }, {
-            "role": "user",
-            "content": f"Today's date is {datetime.now().strftime('%d/%m/%Y')}\n."
-                       f"{str(article)}\n"
-                       f"Your task is to provide a really short feedback on the article only if necessary.\n"
-                       f"if you think the article is good, please return None.\n"
-                       f"if you noticed the field 'message' in the article, it means the writer has revised the article"
-                        f"based on your previous critique. you can provide feedback on the revised article or just "
-                       f"return None if you think the article is good.\n"
-                        f"Please return a string of your critique or None.\n"
-        }]
 
-        lc_messages = convert_openai_messages(prompt)
-        response = ChatOpenAI(model='gpt-4', max_retries=1).invoke(lc_messages).content
-        if response == 'None':
-            return {'critique': None}
-        else:
-            print(f"For article: {article['title']}")
-            print(f"Feedback: {response}\n")
-            return {'critique': response, 'message': None}
+async def critique_node(state: ArticleState, runtime: Runtime[NewspaperContext]) -> dict:
+    ctx = runtime.context
+    if state.get("revisions", 0) >= ctx.max_revisions:
+        # Revision budget spent: ship it rather than loop forever
+        emit(state, "review", "Approved for print")
+        return {"critique": None}
 
-    def run(self, article: dict):
-        article.update(self.critique(article))
-        return article
+    emit(state, "review", "The editor is fact-checking the draft")
+    writer_note = state.get("writer_note")
+    review: Critique = await (CRITIQUE_PROMPT | chat_model(ctx, Critique)).ainvoke(
+        {
+            "today": today(),
+            "language": ctx.language,
+            "query": state["query"],
+            "sources": format_sources(state["sources"], full_text=True),
+            "article": format_article(state),
+            "writer_note": f"\nNote from the writer about their last revision: {writer_note}\n" if writer_note else "",
+        }
+    )
+
+    feedback = review.feedback.strip()
+    if review.approved or not feedback:
+        emit(state, "review", "Approved for print")
+        return {"critique": None}
+
+    emit(state, "review", f"Editor: {feedback}")
+    return {"critique": feedback}
+
+
+def route_after_critique(state: ArticleState) -> str:
+    return "revise" if state.get("critique") else "approve"

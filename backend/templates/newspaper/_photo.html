@@ -1,0 +1,3 @@
+{% if article.image %}
+<a href="{{ article.path }}" class="figure{{ ' illustration' if article.illustrated }}" tabindex="-1"><img class="photo" src="{{ article.image }}" alt="{{ article.image_alt }}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('a').remove()"></a>
+{% endif %}

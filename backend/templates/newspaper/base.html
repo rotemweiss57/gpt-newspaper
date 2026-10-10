@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang }}" dir="{{ page.dir }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GPT Newspaper · {{ date }}</title>
+    {% with title = "The GPT Newspaper · " ~ date, description = editors_note or (articles[0].summary|strip_citations), image = articles[0].image %}
+    {% include "_meta.html" %}
+    {% endwith %}
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    {% include "_theme.html" %}
+    <style>{% block styles %}{% endblock %}</style>
+</head>
+<body>
+    <div class="page">
+        <header class="masthead">
+            <div class="meta">
+                <span>{{ date }}</span>
+                <span class="hide-sm">Personalized edition · {{ articles|length }} {{ "story" if articles|length == 1 else "stories" }}</span>
+                <button class="tool no-print" type="button" onclick="window.print()">Print / Save PDF</button>
+            </div>
+            <h1><a href="/">The GPT Newspaper</a></h1>
+            <p class="tagline">Researched by <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a>, written &amp; edited by a newsroom of <a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">LangGraph</a> agents</p>
+            <hr class="double-rule">
+        </header>
+
+        {% if editors_note %}
+        <p class="editors-note" dir="auto">{{ editors_note }}</p>
+        {% endif %}
+
+        <main>
+            {% block articles %}{% endblock %}
+        </main>
+
+        <footer class="colophon">
+            <span>Written by <code class="model">{{ model }}</code>. AI-generated from cited sources: check them before you rely on anything here.</span>
+            <a class="no-print" href="/">Print another edition →</a>
+        </footer>
+    </div>
+</body>
+</html>

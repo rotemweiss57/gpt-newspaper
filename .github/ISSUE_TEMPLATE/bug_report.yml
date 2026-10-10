@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in the newsroom is broken
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report this! **Never paste API keys** into an issue.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead? Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      placeholder: |
+        1. Topics: ...
+        2. Layout / images / language: ...
+        3. Click "Print my newspaper"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: openai:gpt-5.4-mini
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run it?
+      options: [pip, uv, Docker, CLI, LangGraph Studio]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server logs
+      description: Relevant output from the terminal running `python app.py`.
+      render: shell

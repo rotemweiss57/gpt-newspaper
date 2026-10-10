@@ -1,0 +1,36 @@
+{# Digest: a scannable list of stories with thumbnails #}
+{% extends "newspaper/base.html" %}
+
+{% block styles %}
+.digest { max-width: 900px; margin: 0 auto; }
+.story {
+    display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;
+    padding: 28px 0; border-bottom: 1px solid var(--hairline);
+}
+.story:first-child { padding-top: 0; }
+.story:last-child { border-bottom: 0; }
+.story .photo { aspect-ratio: 4 / 3; }
+.story:not(:has(img)) { grid-template-columns: 1fr; }
+.story:not(:has(img)) > div:first-child { display: none; }
+.story .headline { font-size: 28px; }
+.story .number { font: 800 14px/1 var(--headline); color: var(--muted); margin-right: 6px; }
+@media (max-width: 640px) {
+    .story { grid-template-columns: 1fr; gap: 14px; }
+}
+{% endblock %}
+
+{% block articles %}
+<div class="digest">
+    {% for article in articles %}
+    <article class="story">
+        <div>{% include "newspaper/_photo.html" %}</div>
+        <div>
+            <p class="kicker"><span class="number">{{ "%02d"|format(loop.index) }}</span>{{ article.query }}</p>
+            <h2 class="headline" dir="auto"><a href="{{ article.path }}">{{ article.title }}</a></h2>
+            <p class="summary" dir="auto">{{ article.summary|strip_citations }}</p>
+            <a class="read-more" href="{{ article.path }}">Read the full story · {{ article.reading_minutes }} min →</a>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}

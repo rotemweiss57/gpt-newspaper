@@ -1,11 +1,13 @@
-version: '3.8'
 services:
   gpt-newspaper:
     build:
       context: .
     ports:
-      - "5000:5000"
       - "8000:8000"
-
+    # Optional: keys can also be entered in the web UI
     env_file:
-      - .env
+      - path: .env
+        required: false
+    volumes:
+      - ./outputs:/app/outputs
+    restart: unless-stopped

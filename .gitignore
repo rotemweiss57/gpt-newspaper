@@ -1,5 +1,14 @@
-# .gitignore
-
 .env
-
 outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
