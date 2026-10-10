@@ -49,7 +49,7 @@ python app.py
 ```
 
 Open **http://localhost:8000**, add your keys under **Model & API keys**, pick some topics, and press
-**Print my newspaper** (or <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>Enter</kbd>).
+**Print my newspaper**.
 
 <details>
 <summary><b>With uv</b></summary>
