@@ -64,6 +64,38 @@
                     </div>
                 </section>
 
+                <section class="field">
+                    <span class="label" id="imagesLabel">Images</span>
+                    <div class="styles" role="radiogroup" aria-labelledby="imagesLabel" id="imageStyles">
+                        <label class="style-card">
+                            <input type="radio" name="images" value="ink" checked>
+                            <span class="swatch swatch-ink" aria-hidden="true"></span>
+                            <span class="style-name">Ink</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="engraving">
+                            <span class="swatch swatch-engraving" aria-hidden="true"></span>
+                            <span class="style-name">Engraving</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="risograph">
+                            <span class="swatch swatch-risograph" aria-hidden="true"></span>
+                            <span class="style-name">Risograph</span>
+                        </label>
+                        <label class="style-card">
+                            <input type="radio" name="images" value="photos">
+                            <span class="swatch swatch-photos" aria-hidden="true"></span>
+                            <span class="style-name">News photos</span>
+                        </label>
+                    </div>
+                    <p class="help" id="imagesHelp">AI illustrations in the paper's house style, labeled as such.</p>
+                </section>
+
+                <section class="field">
+                    <label class="label" for="languageSelect">Language</label>
+                    <select id="languageSelect" class="select"><option value="en">English</option></select>
+                </section>
+
                 <details class="advanced" id="settings">
                     <summary>Model &amp; API keys <span class="settings-status" id="settingsStatus"></span></summary>
                     <div class="settings">
@@ -94,6 +126,12 @@
                             <p class="help" id="providerKeyHelp"></p>
                         </div>
 
+                        <div class="field" id="imageKeyField" hidden>
+                            <label class="label" for="imageKey">OpenAI API key · for illustrations</label>
+                            <input id="imageKey" class="key-input" type="password" spellcheck="false" autocomplete="off" placeholder="Optional">
+                            <p class="help">Illustrations are drawn by OpenAI's image model. Without a key, the paper uses news photos.</p>
+                        </div>
+
                         <label class="remember">
                             <input type="checkbox" id="rememberKeys" checked>
                             Remember keys in this browser
@@ -104,28 +142,39 @@
 
                 <p class="error" id="formError" role="alert" hidden></p>
 
-                <button type="submit" class="primary" id="submitButton">Print my newspaper</button>
+                <button type="submit" class="primary" id="submitButton">Print my newspaper <kbd class="shortcut" id="shortcutHint">⌘ Enter</kbd></button>
             </form>
 
             <!-- Newsroom -->
             <section id="newsroom" class="panel" hidden aria-live="polite">
                 <div class="newsroom-head">
                     <h2>In the newsroom</h2>
-                    <span class="model-tag" id="modelTag"></span>
+                    <span class="model-tag"><span id="modelTag"></span> · <span id="elapsed">0:00</span></span>
                 </div>
                 <ol class="stages-legend" aria-hidden="true">
-                    <li>Search</li><li>Curate</li><li>Write</li><li>Review</li><li>Design</li>
+                    <li>Plan</li><li>Search</li><li>Curate</li><li>Write</li><li>Review</li><li>Design</li>
                 </ol>
                 <ul class="desks" id="desks"></ul>
                 <p class="press" id="press"></p>
+
+                <div class="fresh" id="fresh" hidden>
+                    <p class="label">Fresh off the desk</p>
+                    <div class="fresh-grid" id="freshGrid"></div>
+                </div>
 
                 <div class="result" id="result" hidden>
                     <p class="result-title" id="resultTitle"></p>
                     <div class="result-actions">
                         <a class="primary" id="readLink" href="#">Read your newspaper →</a>
+                        <button type="button" class="secondary" id="copyButton">Copy link</button>
                         <button type="button" class="secondary" id="againButton">New edition</button>
                     </div>
                 </div>
+            </section>
+
+            <section class="archive" id="archive" hidden aria-labelledby="archiveTitle">
+                <h2 class="archive-title" id="archiveTitle">Recent editions</h2>
+                <div class="archive-grid" id="archiveGrid"></div>
             </section>
         </main>
 
@@ -139,7 +188,7 @@
         <li class="desk">
             <div class="desk-top">
                 <span class="desk-topic"></span>
-                <ol class="steps"><li></li><li></li><li></li><li></li><li></li></ol>
+                <ol class="steps"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
             </div>
             <p class="desk-status">Waiting for a reporter…</p>
         </li>

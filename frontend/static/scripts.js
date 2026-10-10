@@ -1,5 +1,5 @@
 const SUGGESTIONS = ['AI agents', 'Climate tech', 'Space exploration', 'Global markets', 'Formula 1', 'Health & science'];
-const STAGES = ['search', 'curate', 'write', 'review', 'design'];
+const STAGES = ['plan', 'search', 'curate', 'write', 'review', 'design'];
 const STORAGE_KEY = 'gpt-newspaper:v2';
 const KEYS_STORAGE_KEY = 'gpt-newspaper:keys';
 
@@ -73,7 +73,26 @@ function missingKeys() {
     return missing;
 }
 
+function currentImages() {
+    return document.querySelector('input[name="images"]:checked')?.value || 'photos';
+}
+
+/** Illustrations need an OpenAI key; show a field for it when the chat model's key isn't one. */
+function renderImageKey() {
+    const illustrated = currentImages() !== 'photos';
+    const needsOwnKey = illustrated && inferProvider(currentModel()) !== 'openai' && !state.serverKeys.openai;
+    $('imageKeyField').hidden = !needsOwnKey;
+    $('imageKey').value = state.keys.providers.openai || '';
+    const hasKey = state.serverKeys.openai || state.keys.providers.openai;
+    $('imagesHelp').textContent = !illustrated
+        ? "Photos from the news sources. Quality varies by outlet."
+        : hasKey
+            ? "AI illustrations in the paper's house style, always labeled as such."
+            : 'Needs an OpenAI API key (add it under “Model & API keys”). Without one, the paper uses news photos.';
+}
+
 function renderKeys() {
+    renderImageKey();
     const provider = inferProvider(currentModel());
     const name = providerName(provider);
     const missing = missingKeys();
@@ -135,6 +154,14 @@ function setupKeys() {
         renderStatus();
     });
     $('modelInput').addEventListener('input', renderKeys);
+    document.querySelectorAll('input[name="images"]').forEach((radio) => radio.addEventListener('change', renderKeys));
+    $('imageKey').addEventListener('input', (event) => {
+        const value = event.target.value.trim();
+        if (value) state.keys.providers.openai = value;
+        else delete state.keys.providers.openai;
+        persistKeys();
+        renderImageKey();
+    });
     $('rememberKeys').addEventListener('change', persistKeys);
 }
 
@@ -245,8 +272,9 @@ function updateDesk(desk, stage, message) {
     const status = desk.querySelector('.desk-status');
     const steps = desk.querySelectorAll('.steps li');
 
-    if (stage === 'skipped') {
-        desk.classList.add('is-skipped');
+    if (stage === 'skipped' || stage === 'failed') {
+        desk.classList.add(`is-${stage}`);
+        desk.querySelectorAll('.steps li.active').forEach((step) => step.classList.remove('active'));
         status.textContent = message;
         return;
     }
@@ -267,26 +295,110 @@ function updateDesk(desk, stage, message) {
     }
 }
 
+function image(src, onFail) {
+    const img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.addEventListener('error', onFail || (() => img.remove()));
+    img.src = src;
+    return img;
+}
+
+function addFreshCard(article) {
+    const card = Object.assign(document.createElement('a'), { className: 'fresh-card', href: article.url, target: '_blank' });
+    if (article.image) card.append(Object.assign(image(article.image), { loading: 'eager' }));
+    card.append(
+        Object.assign(document.createElement('h3'), { textContent: article.title, dir: 'auto' }),
+        Object.assign(document.createElement('p'), { textContent: `${article.reading_minutes} min read` }),
+    );
+    $('freshGrid').append(card);
+    $('fresh').hidden = false;
+}
+
+let timer = null;
+
+function startTimer() {
+    const started = Date.now();
+    const tick = () => {
+        const seconds = Math.floor((Date.now() - started) / 1000);
+        $('elapsed').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timer);
+}
+
 function showNewsroom(topics, model) {
     $('composer').hidden = true;
     $('newsroom').hidden = false;
     $('result').hidden = true;
+    $('fresh').hidden = true;
+    $('freshGrid').replaceChildren();
     $('press').textContent = '';
     $('modelTag').textContent = model;
+    document.title = 'Printing… · The GPT Newspaper';
+    startTimer();
     return createDesks(topics);
 }
 
 function showComposer() {
+    stopTimer();
+    document.title = 'The GPT Newspaper';
     $('newsroom').hidden = true;
     $('composer').hidden = false;
     $('submitButton').disabled = false;
 }
 
-function showResult(url, count) {
-    $('resultTitle').textContent = `Your ${count === 1 ? 'one-story' : `${count}-story`} edition is ready`;
+function showResult({ url, articles, failed }) {
+    stopTimer();
+    document.title = '✓ Your edition is ready · The GPT Newspaper';
+    const stories = articles === 1 ? 'one-story' : `${articles}-story`;
+    $('resultTitle').textContent = `Your ${stories} edition is ready` + (failed ? ` (${failed} didn't make it)` : '');
     $('readLink').href = url;
     $('result').hidden = false;
     $('readLink').focus();
+    loadArchive();
+}
+
+async function copyLink() {
+    const url = new URL($('readLink').getAttribute('href'), location.href).href;
+    try {
+        await navigator.clipboard.writeText(url);
+        $('copyButton').textContent = 'Copied ✓';
+    } catch {
+        $('copyButton').textContent = 'Copy failed';
+    }
+    setTimeout(() => { $('copyButton').textContent = 'Copy link'; }, 1800);
+}
+
+// ---------- archive ----------
+
+async function loadArchive() {
+    let editions = [];
+    try {
+        editions = await (await fetch('/api/editions')).json();
+    } catch {
+        return;
+    }
+    const cards = editions.map((edition) => {
+        const card = Object.assign(document.createElement('a'), { className: 'edition-card', href: edition.url });
+        if (edition.image) card.append(image(edition.image));
+        const when = edition.created_at ? new Date(edition.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : edition.date;
+        card.append(
+            Object.assign(document.createElement('h3'), { textContent: edition.title, dir: 'auto' }),
+            Object.assign(document.createElement('span'), {
+                className: 'edition-meta',
+                textContent: `${when} · ${(edition.topics || []).join(', ')}`,
+            }),
+        );
+        return card;
+    });
+    $('archiveGrid').replaceChildren(...cards);
+    $('archive').hidden = cards.length === 0;
 }
 
 // ---------- streaming ----------
@@ -342,7 +454,10 @@ async function produceNewspaper(event) {
     const keys = {};
     if (state.keys.tavily) keys.tavily_api_key = state.keys.tavily;
     if (state.keys.providers[provider]) keys.api_key = state.keys.providers[provider];
-    savePrefs({ topics, layout, model: model === state.defaultModel ? '' : model });
+    const images = currentImages();
+    if (images !== 'photos' && state.keys.providers.openai) keys.image_api_key = state.keys.providers.openai;
+    const language = $('languageSelect').value;
+    savePrefs({ topics, layout, language, images, model: model === state.defaultModel ? '' : model });
 
     $('submitButton').disabled = true;
     hideError();
@@ -352,7 +467,7 @@ async function produceNewspaper(event) {
         response = await fetch('/api/newspaper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ topics, layout, model, ...keys }),
+            body: JSON.stringify({ topics, layout, language, images, model, ...keys }),
         });
     } catch {
         showError('Could not reach the server. Is it still running?');
@@ -374,9 +489,10 @@ async function produceNewspaper(event) {
             if (message.type === 'progress') {
                 if (message.index != null) updateDesk(desks[message.index], message.stage, message.message);
                 else $('press').textContent = message.message;
+                if (message.article) addFreshCard(message.article);
             } else if (message.type === 'done') {
                 $('press').textContent = 'Hot off the press.';
-                showResult(message.url, message.articles);
+                showResult(message);
                 return;
             } else if (message.type === 'error') {
                 throw new Error(message.message);
@@ -398,6 +514,11 @@ async function loadConfig() {
         state.maxTopics = config.max_topics;
         state.serverKeys = config.server_keys || {};
         $('modelInput').placeholder = config.model;
+        const defaultImages = document.querySelector(`input[name="images"][value="${config.images?.default}"]`);
+        if (defaultImages) defaultImages.checked = true;
+        $('languageSelect').replaceChildren(...Object.entries(config.languages || { en: 'English' }).map(
+            ([code, name]) => Object.assign(document.createElement('option'), { value: code, textContent: name }),
+        ));
         $('modelField').hidden = !config.allow_model_override;
     } catch {
         /* the form still works with server defaults */
@@ -412,6 +533,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     setupKeys();
     $('composer').addEventListener('submit', produceNewspaper);
     $('againButton').addEventListener('click', showComposer);
+    $('copyButton').addEventListener('click', copyLink);
+
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    $('shortcutHint').textContent = isMac ? '⌘ Enter' : 'Ctrl Enter';
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey) && !$('composer').hidden) {
+            event.preventDefault();
+            $('composer').requestSubmit();
+        }
+    });
 
     await loadConfig();
 
@@ -422,7 +553,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (radio) radio.checked = true;
     }
     if (prefs.model) $('modelInput').value = prefs.model;
+    const savedImages = prefs.images && document.querySelector(`input[name="images"][value="${prefs.images}"]`);
+    if (savedImages) savedImages.checked = true;
+    if (prefs.language && $('languageSelect').querySelector(`option[value="${prefs.language}"]`)) {
+        $('languageSelect').value = prefs.language;
+    }
     renderTopics();
     renderKeys();
     if (missingKeys().length) $('settings').open = true;
+    loadArchive();
 });
