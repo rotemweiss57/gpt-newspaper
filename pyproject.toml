@@ -16,6 +16,7 @@ dependencies = [
     "jinja2>=3.1",
     "pydantic>=2.7",
     "python-dotenv>=1.0",
+    "certifi",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +35,7 @@ all = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8", "pytest-asyncio>=0.24", "httpx>=0.27"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "httpx>=0.27", "ruff>=0.6"]
 
 [tool.uv]
 package = false
@@ -42,3 +43,18 @@ package = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, pyupgrade, bugbear, simplify, bandit (security), ruff-specific
+select = ["E", "F", "I", "UP", "B", "SIM", "S", "RUF"]
+ignore = [
+    "RUF001", "RUF002", "RUF003",  # typographic quotes in user-facing copy are intentional
+    "S104",  # binding to 0.0.0.0 is deliberate for Docker
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
