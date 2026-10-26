@@ -23,7 +23,11 @@ async def assignment_node(state: ArticleState, runtime: Runtime[NewspaperContext
         }
     )
     # Dedupe case-insensitively, keep the model's priority order
-    queries = list({q.strip().lower(): q.strip() for q in reversed(plan.queries) if q.strip()}.values())[::-1]
+    unique: dict[str, str] = {}
+    for q in plan.queries:
+        if q.strip():
+            unique.setdefault(q.strip().lower(), q.strip())
+    queries = list(unique.values())
     queries = queries[: ctx.searches_per_topic] or [query]
     emit(state, "plan", "Assigned: " + " · ".join(f"“{q}”" for q in queries))
     return {"queries": queries}

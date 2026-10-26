@@ -179,3 +179,22 @@ def test_cli_reports_setup_errors(monkeypatch, capsys):
     monkeypatch.delenv("TAVILY_API_KEY", raising=False)
     assert main(["robots"]) == 1
     assert "Tavily API key" in capsys.readouterr().err
+
+
+async def test_planner_dedupe_keeps_the_top_queries(outputs_dir, fake_llm, fake_search, monkeypatch):
+    from langchain_core.runnables import RunnableLambda
+
+    from backend.schemas import SearchPlan
+
+    plan = SearchPlan(queries=["robots latest", "robots analysis", "robots history", "Robots Latest"])
+    structured = fake_llm.with_structured_output
+    monkeypatch.setattr(
+        fake_llm,
+        "with_structured_output",
+        lambda schema: RunnableLambda(lambda _: plan) if schema is SearchPlan else structured(schema),
+    )
+    await graph.ainvoke(
+        {"topics": ["robots"], "layout": "layout_1"}, context=context(outputs_dir, searches_per_topic=2)
+    )
+    # A repeat at the end of the plan must not push the planner's first choice out
+    assert [query for query, *_ in fake_search[:2]] == ["robots latest", "robots analysis"]
